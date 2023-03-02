@@ -1,0 +1,29 @@
+# name: Deploy to Azure
+# on:
+#   push:
+#     branches:
+#       - main
+
+# concurrency:
+#   group: deployment
+
+# jobs:
+#   build_and_deploy:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout the project
+#         uses: actions/checkout@v3
+
+#       - name: Login to Azure
+#         run: .azure/setup.sh --ci-login
+#         env:
+#           AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+
+#       - name: Update infrastructure
+#         run: .azure/infra.sh update
+
+#       - name: Build project
+#         run: .azure/build.sh
+
+#       - name: Deploy project
+#         run: .azure/deploy.sh

@@ -1,0 +1,10 @@
+0. Copilot set up
+  - Sign up https://github.com/login/oauth/authorize?client_id=Iv1.43d3cd82bfd1c7a5&state=8ROLirvJdwuEqBSCcvZu9&redirect_uri=https%3A%2F%2Fgithubnext.com%2Fsignup%2Fauth_callback
+
+1. Add CosmosDB to your project
+  - install package
+  - Create a new database service
+  - Create a Datbase class that setup the CosmosDB client, db and connection
+  - Use a comment to create methods to create, read, update and delete data
+  - 
+

@@ -1,0 +1,16 @@
+{
+  "name": "gateway-api",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www",
+    "docker:build": "docker build --tag gateway-api --file ./Dockerfile ../..",
+    "docker:run": "docker run --rm --publish 4003:4003 gateway-api"
+  },
+  "dependencies": {
+    "cookie-parser": "~1.4.4",
+    "debug": "^4.3.4",
+    "express": "^4.18.2",
+    "pino-http": "^8.2.1"
+  }
+}
