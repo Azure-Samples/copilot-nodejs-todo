@@ -1,22 +1,47 @@
 // Import Cosmos SDK
 import { CosmosClient } from "@azure/cosmos";
 
-// Create a DbService class to wrap the Cosmos SDK,
-// connecting to the 'todos' database and 'tasks' container
+/**
+ * This class is responsible for connecting to Cosmos DB and
+ * performing CRUD operations on the database and container.
+ * It is a singleton class, so only one instance of it will
+ * exist at any given time.
+ * @class
+ * @property {CosmosClient} client - The CosmosClient instance
+ * @property {any} database - The database instance
+ * @property {any} container - The container instance
+ * @method getTasks - Get all tasks
+ * @method getTask - Get a task by id
+ * @method createTask - Create a task
+ * @method updateTask - Update a task
+ * @method deleteTask - Delete a task
+ * @returns {DbService} - The DbService instance
+ */
 export class DbService {
   private client: CosmosClient;
   private database: any;
   private container: any;
 
+  // Create a static instance of the class
+  private static instance: DbService;
+
+  // Create a static method to get the instance
+  public static getInstance() {
+    if (!DbService.instance) {
+      DbService.instance = new DbService();
+    }
+
+    return DbService.instance;
+  }
+
   constructor() {
-    // check that the environment variables are set
+    // Check that the environment variables are set
     if (!process.env.COSMOS_ENDPOINT) {
       throw new Error("COSMOS_ENDPOINT is not set");
     }
     if (!process.env.COSMOS_KEY) {
       throw new Error("COSMOS_KEY is not set");
     }
-
 
     // Connect to Cosmos DB
     this.client = new CosmosClient({

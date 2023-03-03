@@ -303,85 +303,177 @@ export class DbService {
 
 </div>
 
-If you look at the details, Copilot generated for you:
+Accept the suggestion, then if we look at the details, Copilot generated for you:
 - A class definition with a constructor that connects to the Cosmos DB instance, and creates the database and container if they don't exist.
 - All create, read, update, and delete (CRUD) operations for the tasks
 
-How awesome is that? But wait, it seems that TypeScript is complaining about the `process.env.COSMOS_ENDPOINT` and `process.env.COSMOS_KEY` variables being possibly undefined. Let's fix that, again using Copilot. Add the beginning of the constructor, add this comment:
+How awesome is that? But wait, it seems that TypeScript is complaining about the `process.env.COSMOS_ENDPOINT` and `process.env.COSMOS_KEY` variables being possibly undefined. Let's fix that, again using Copilot. At the beginning of the class constructor, add this comment:
 
 ```ts
 // Check that the environment variables are set
 ```
 
-And then hit enter. Copilot should progressively suggest the code to check the environment variables:
+And then hit enter, multiple times until you get the wanted result. Copilot should progressively suggest the code to check the environment variables.
 
+<details>
+<summary>Example Copilot suggestion</summary>
 
-
-
-### Creating the database plugin
-
-To store the settings of each user, we'll need at some point a database. For now, we'll start by using a mock with an in-memory database, and we'll add the proper connection later when our database will be deployed.
-
-Let's start by creating a plugin for Fastify to make it easy to use in our API.
-
-Create a new file `packages/settings-api/plugins/database.js` with the following content:
-
-```js
-import fp from 'fastify-plugin'
-
-// the use of fastify-plugin is required to be able
-// to export the decorators to the outer scope
-
-export default fp(async function (fastify, opts) {
-  fastify.decorate('db', new MockDatabase());
-});
+```ts
+if (!process.env.COSMOS_ENDPOINT) {
+  throw new Error("COSMOS_ENDPOINT is not set");
+}
+if (!process.env.COSMOS_KEY) {
+  throw new Error("COSMOS_KEY is not set");
+}
 ```
 
-Plugins in Fastify are just functions that receive the Fastify instance and the options passed to the plugin. All plugins within the `plugins/` folder will be automatically loaded by Fastify when the server starts.
+</details>
 
-Using the `decorate` method, we can add properties to the Fastify instance, which will be available in all the routes of our API. It's a form of [dependency injection](https://en.wikipedia.org/wiki/Dependency_injection). We use it here to provide a `db` property that will be an instance of our database service.
+The final result should look like this:
 
-Now we'll implement the `MockDatabase` class. Add this code at the bottom of the file:
+```ts
+// Import Cosmos SDK
+import { CosmosClient } from "@azure/cosmos";
 
-```js
-class MockDatabase {
+// Create a DbService class to wrap the Cosmos SDK,
+// connecting to the 'todos' database and 'tasks' container
+export class DbService {
+  private client: CosmosClient;
+  private database: any;
+  private container: any;
+
   constructor() {
-    this.db = {};
+    // Check that the environment variables are set
+    if (!process.env.COSMOS_ENDPOINT) {
+      throw new Error("COSMOS_ENDPOINT is not set");
+    }
+    if (!process.env.COSMOS_KEY) {
+      throw new Error("COSMOS_KEY is not set");
+    }
+
+    // Connect to Cosmos DB
+    this.client = new CosmosClient({
+      endpoint: process.env.COSMOS_ENDPOINT,
+      key: process.env.COSMOS_KEY,
+    });
+
+    // Create a database
+    this.database = this.client.database("todos");
+
+    // Create a container
+    this.container = this.database.container("tasks");
   }
 
-  async saveSettings(userId, settings) {
-    await this.#delay();
-    this.db[userId] = settings;
-  }
-  
-  async getSettings(userId) {
-    await this.#delay();
-    return this.db[userId];
+  // Create a function to get all tasks
+  async getTasks() {
+    const { resources: tasks } = await this.container.items
+      .query({
+        query: "SELECT * from c",
+      })
+      .fetchAll();
+
+    return tasks;
   }
 
-  async #delay() {
-    return new Promise(resolve => setTimeout(resolve, 10));
+  // Create a function to get a task by id
+  async getTask(id: string) {
+    const { resource: task } = await this.container.item(id).read();
+
+    return task;
+  }
+
+  // Create a function to create a task
+  async createTask(task: any) {
+    const { resource: createdTask } = await this.container.items.create(task);
+
+    return createdTask;
+  }
+
+  // Create a function to update a task
+  async updateTask(id: string, task: any) {
+    const { resource: updatedTask } = await this.container
+      .item(id)
+      .replace(task);
+
+    return updatedTask;
+  }
+
+  // Create a function to delete a task
+  async deleteTask(id: string) {
+    const { resource: deletedTask } = await this.container.item(id).delete();
+
+    return deletedTask;
   }
 }
 ```
 
-<div class="tip" data-title="tip">
+Of course, the code is not perfect, as for example the `deleteTask` does not need to return anything, and it's missing some type definitions. But it's a good start, and we can improve it later. Keeping in mind that we only had to write a few comments to get a working database service, it's pretty amazing! And we didn't even had to go read the documentation of the Cosmos SDK.
 
-> We are using the **async/await** keywords to allow asynchronous, promise-based behavior to be written like regular synchronous code. You can read more about it in the [MDN documentation](https://developer.mozilla.org/docs/Learn/JavaScript/Asynchronous/Promises#async_and_await).
+### Adding documentation
 
-</div>
+Speaking of documentation, it's always a good idea to add some comments to your code. Not only for other developers, but also for yourself when you come back to your code after a few weeks or months. Again, let's use Copilot to help us with the task.
 
-As you can see, we are using a simple object to store the settings of each user. We are also adding a delay of 10ms to simulate the latency of a real database call.
+Just before the `DbService` class definition, remove this comment that we added earlier:
 
-<div class="tip" data-title="tip">
+```ts
+// Create a DbService class to wrap the Cosmos SDK,
+// connecting to the 'todos' database and 'tasks' container
+```
 
-> Did you noticed the `#` before the `#delay()` method? This new feature of JavaScript means that this method is private, and only class members are allowed to call it. You can read more about it in the [MDN documentation](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Classes/Private_class_fields).
+And instead, start typing `/**` to add a JSDoc comment, and hit enter. Copilot will start suggesting the documentation for the class. Hit `Tab` then `Enter` to accept the suggestions as they come, until the documentation is complete. You should end up with something like this:
 
-</div>
+```ts
+/**
+ * This class is responsible for connecting to Cosmos DB and
+ * performing CRUD operations on the database and container.
+ * It is a singleton class, so only one instance of it will
+ * exist at any given time.
+ * @class
+ * @property {CosmosClient} client - The CosmosClient instance
+ * @property {any} database - The database instance
+ * @property {any} container - The container instance
+ * @method getTasks - Get all tasks
+ * @method getTask - Get a task by id
+ * @method createTask - Create a task
+ * @method updateTask - Update a task
+ * @method deleteTask - Delete a task
+ * @returns {DbService} - The DbService instance
+ */
+```
 
+Not bad, right? Wait, it's even mentioning something we forgot: the `DbService` class should be a singleton, as we don't want to create multiple connections to the database. Let's fix that.
 
+This time, we'll try to use some black magic 👀.
 
-### Testing our application
+Put your cursor at the end of this line in the `DbService` class:
+
+```ts
+private container: any;
+```
+
+Wow, now it even suggests you the comments! Accept that and continue, until you get what we need. You should end up with something like this:
+
+```ts
+// Create a static instance of the class
+private static instance: DbService;
+
+// Create a static method to get the instance
+public static getInstance() {
+  if (!DbService.instance) {
+    DbService.instance = new DbService();
+  }
+
+  return DbService.instance;
+}
+```
+
+Don't you agree that this looks like black magic? We didn't even tell Copilot what we wanted, and it just gave us the code we needed. How useful is that?
+
+Let's move on to the next step.
+
+---
+
+### Adding tests
 
 We're now ready to test our whole application locally. To do so, we need to start in parallel the SWA CLI and the Docker compose environment with our services.
 
