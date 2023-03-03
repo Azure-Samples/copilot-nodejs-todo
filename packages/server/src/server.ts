@@ -1,17 +1,11 @@
 import http from 'node:http';
-import dns from 'node:dns';
-import app from './app.js';
-
-// Workaround from https://stackoverflow.com/a/72416352/599991
-dns.setDefaultResultOrder('ipv4first');
+import app from './app';
 
 const port = process.env.PORT || '3000';
 const server = http.createServer(app);
 
 server.listen(port, () => {
-  const addr = server.address();
-  const bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr?.port;
-  console.info('Listening on ' + bind);
+  console.info(`Listening on http://localhost:${port}`);
 });
 
 export default server;

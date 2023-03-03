@@ -1,6 +1,6 @@
 import express from 'express';
 import pino from 'pino-http';
-import router from './routes/index.js';
+import router from './routes/index';
 
 const app = express();
 app.use(pino());
