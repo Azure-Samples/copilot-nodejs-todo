@@ -1,36 +1,33 @@
-// Import Cosmos SDK
-import { CosmosClient } from "@azure/cosmos";
+// Import Cosmos SDK and task model
+import { Container, CosmosClient, Database } from "@azure/cosmos";
+import { Task } from "../models/task";
 
 /**
- * This class is responsible for connecting to Cosmos DB and
- * performing CRUD operations on the database and container.
- * It is a singleton class, so only one instance of it will
- * exist at any given time.
+ * This class provides a service for interacting with the Cosmos DB database.
+ * It is a singleton class, so only one instance of it will ever exist.
  * @class
- * @property {CosmosClient} client - The CosmosClient instance
- * @property {any} database - The database instance
- * @property {any} container - The container instance
- * @method getTasks - Get all tasks
+ * @property {CosmosClient} client - The Cosmos DB client
+ * @property {any} database - The database
+ * @property {any} container - The container
+ * @method createTask - Create a new task
  * @method getTask - Get a task by id
- * @method createTask - Create a task
+ * @method getTasks - Get all tasks for a user
  * @method updateTask - Update a task
  * @method deleteTask - Delete a task
- * @returns {DbService} - The DbService instance
  */
 export class DbService {
   private client: CosmosClient;
-  private database: any;
-  private container: any;
+  private database: Database;
+  private container: Container;
 
-  // Create a static instance of the class
+  // The singleton instance
   private static instance: DbService;
 
-  // Create a static method to get the instance
-  public static getInstance() {
+  // Get the singleton instance
+  public static getInstance(): DbService {
     if (!DbService.instance) {
       DbService.instance = new DbService();
     }
-
     return DbService.instance;
   }
 
@@ -43,57 +40,61 @@ export class DbService {
       throw new Error("COSMOS_KEY is not set");
     }
 
-    // Connect to Cosmos DB
+    // Connect to the database
     this.client = new CosmosClient({
       endpoint: process.env.COSMOS_ENDPOINT,
-      key: process.env.COSMOS_KEY,
+      key: process.env.COSMOS_KEY
     });
-
-    // Create a database
     this.database = this.client.database("todos");
-
-    // Create a container
     this.container = this.database.container("tasks");
   }
 
-  // Create a function to get all tasks
-  async getTasks() {
-    const { resources: tasks } = await this.container.items
-      .query({
-        query: "SELECT * from c",
-      })
-      .fetchAll();
+  // Create a new task
+  async createTask(task: Task): Promise<Task | undefined> {
+    // Create a new task in the database
+    const { resource: createdItem } = await this.container.items.create(task);
 
-    return tasks;
+    // Return the new task
+    return createdItem;
   }
 
-  // Create a function to get a task by id
-  async getTask(id: string) {
+  // Get a task by id
+  async getTask(id: string): Promise<Task> {
+    // Get the task from the database
     const { resource: task } = await this.container.item(id).read();
 
+    // Return the task
     return task;
   }
 
-  // Create a function to create a task
-  async createTask(task: any) {
-    const { resource: createdTask } = await this.container.items.create(task);
+  // Get all tasks for a user
+  async getTasks(userId: string): Promise<Task[]> {
+    // Get the tasks from the database
+    const { resources: tasks } = await this.container
+      .items.query({
+        query: "SELECT * FROM c WHERE c.userId = @userId",
+        parameters: [{ name: "@userId", value: userId }]
+      })
+      .fetchAll();
 
-    return createdTask;
+    // Return the tasks
+    return tasks;
   }
 
-  // Create a function to update a task
-  async updateTask(id: string, task: any) {
-    const { resource: updatedTask } = await this.container
-      .item(id)
+  // Update a task
+  async updateTask(task: Task): Promise<Task | undefined> {
+    // Update the task in the database
+    const { resource: updatedItem } = await this.container
+      .item(task.id)
       .replace(task);
 
-    return updatedTask;
+    // Return the updated task
+    return updatedItem;
   }
 
-  // Create a function to delete a task
-  async deleteTask(id: string) {
-    const { resource: deletedTask } = await this.container.item(id).delete();
-
-    return deletedTask;
+  // Delete a task
+  async deleteTask(id: string): Promise<void> {
+    // Delete the task from the database
+    await this.container.item(id).delete();
   }
 }
