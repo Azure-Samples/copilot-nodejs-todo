@@ -194,11 +194,127 @@ cd packages/server
 npm install @azure/cosmos
 ```
 
-Once it's installed the package, create a new file `packages/server/src/services/database.ts` and start typing the following content in it:
+Once it's installed the package, create a new file `packages/server/src/services/db.ts` and start typing the following content in it:
 
 ```ts
-// Import the @azure/cosmos SDK
+// Import the Cosmos SDK
 ```
+
+As soon as you finish typing and hit enter, Copilot will suggest the import for you:
+
+TODO
+![Screenshot of VS Code showing Copilot suggesting the import](./assets/copilot-import.png)
+
+<details>
+<summary>Example Copilot suggestion</summary>
+
+```ts
+import { CosmosClient } from '@azure/cosmos';
+```
+
+</details>
+
+<div class="tip" data-title="tip">
+
+> If you have everything setup correctly, you should see the GitHub Copilot icon in the bottom right corner of your editor changing to a spinner as you type. If you don't see it, make sure you have the [GitHub Copilot extension](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot) installed and enabled.
+
+</div>
+
+Accept the suggestion by hitting the `Tab` key, and then continue by adding the following comment:
+
+```ts
+// Create a DbService class to wrap the Cosmos SDK,
+// connecting to the 'todos' database and 'tasks' container
+```
+
+After hitting enter, Copilot should suggest a complete class definition for you!
+
+<details>
+<summary>Example Copilot suggestion</summary>
+
+```ts
+export class DbService {
+  private client: CosmosClient;
+  private database: any;
+  private container: any;
+
+  constructor() {
+    // Connect to Cosmos DB
+    this.client = new CosmosClient({
+      endpoint: process.env.COSMOS_ENDPOINT,
+      key: process.env.COSMOS_KEY,
+    });
+
+    // Create a database
+    this.database = this.client.database("todos");
+
+    // Create a container
+    this.container = this.database.container("tasks");
+  }
+
+  // Create a function to get all tasks
+  async getTasks() {
+    const { resources: tasks } = await this.container.items
+      .query({
+        query: "SELECT * from c",
+      })
+      .fetchAll();
+
+    return tasks;
+  }
+
+  // Create a function to get a task by id
+  async getTask(id: string) {
+    const { resource: task } = await this.container.item(id).read();
+
+    return task;
+  }
+
+  // Create a function to create a task
+  async createTask(task: any) {
+    const { resource: createdTask } = await this.container.items.create(task);
+
+    return createdTask;
+  }
+
+  // Create a function to update a task
+  async updateTask(id: string, task: any) {
+    const { resource: updatedTask } = await this.container
+      .item(id)
+      .replace(task);
+
+    return updatedTask;
+  }
+
+  // Create a function to delete a task
+  async deleteTask(id: string) {
+    const { resource: deletedTask } = await this.container.item(id).delete();
+
+    return deletedTask;
+  }
+}
+```
+
+</details>
+
+<div class="info" data-title="note">
+
+> Copilot generates new code for you dynamically, so the suggestion you get might be a bit different from the one shown here. But the idea is the same: it's a complete class definition with all the functions you need to implement the database service.
+
+</div>
+
+If you look at the details, Copilot generated for you:
+- A class definition with a constructor that connects to the Cosmos DB instance, and creates the database and container if they don't exist.
+- All create, read, update, and delete (CRUD) operations for the tasks
+
+How awesome is that? But wait, it seems that TypeScript is complaining about the `process.env.COSMOS_ENDPOINT` and `process.env.COSMOS_KEY` variables being possibly undefined. Let's fix that, again using Copilot. Add the beginning of the constructor, add this comment:
+
+```ts
+// Check that the environment variables are set
+```
+
+And then hit enter. Copilot should progressively suggest the code to check the environment variables:
+
 
 
 
