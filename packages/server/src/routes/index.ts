@@ -1,4 +1,6 @@
 import express from 'express';
+import { Task } from '../models/task';
+
 const router = express.Router();
 
 router.get('/', async function(req, res) {
@@ -8,9 +10,9 @@ router.get('/', async function(req, res) {
 router.get('/users/:userId/tasks', async function(req, res) {
   try {
     const { userId } = req.params;
-    const tasks = []
-
+    
     // TODO: get tasks from database
+    const tasks: Task[] = [];
 
     res.json({ tasks });
   } catch (error: any) {
