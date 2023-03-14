@@ -4,7 +4,7 @@ description: Discover how to use GitHub Copilot to quickly build a Node.js appli
 type: workshop
 authors: Yohan Lasorsa
 contacts: '@sinedied'
-banner_url: assets/copilot-banner.jpg
+banner_url: assets/copilot-banner.jpg_TODO
 duration_minutes: 20
 audience: students, devs
 level: intermediate
@@ -204,7 +204,6 @@ Once it's installed the package, create a new file `packages/server/src/services
 
 As soon as you finish typing and hit enter, Copilot will suggest the import for you:
 
-TODO
 ![Screenshot of VS Code showing Copilot suggesting the import](./assets/copilot-import.png)
 
 <div class="tip" data-title="tip">
@@ -651,15 +650,14 @@ it('should delete a task', async () => {
 
 </details>
 
-
-Since we've mocked the Cosmos SDK completely, all the tests should fail.
+Since we've mocked out the Cosmos SDK completely with `jest.mock()`, all the tests should fail.
 Run the following command in a terminal to launch the tests:
 
 ```bash
 npm test
 ```
 
-As expected, it fails.
+As expected, it fails. But that's a good thing, as good test writing is all about failing tests first!
 
 ### Mocking Cosmos SDK methods
 
@@ -681,8 +679,91 @@ Scroll up to see the first test failure, and you should see that `fetchAll()` is
 
 ![Screenshot of jest output showing the first test failure](./assets/jest-test-failure.png)
 
+In the mocked `query()` method, remove this line `resources: []` of its current implementation, and wait for Copilot to suggest something.
 
+![Screenshot of Copilot suggesting a new line of code](./assets/copilot-mock-fix-suggestion.png)
 
+<details>
+<summary>Example Copilot suggestion</summary>
+
+```ts
+fetchAll: () => ({
+  resources: []
+})
+```
+
+</details>
+
+Yes, that's it, Copilot caught up and is fixing its own mistake!
+Let's accept the suggestions until it's complete, and run the tests again. This time, the last 3 tests are failing. Let's see what's going on with the first one.
+
+![Screenshot of jest output showing the second test failure](./assets/jest-test-failure-2.png)
+
+Okay, slight mistake as it seems `container.item` is not mocked properly, and looked at the mocks Copilot generated everything was added to the `items` property, not `item`. Let's fix that.
+
+Below the `items` property closing curly brace, add this code (Copilot might even suggest it for you):
+
+```ts
+item: () => ({
+
+}),
+```
+
+Then move the `read()`, `upsert()` and `delete()` methods from the `items` block to the `item` block we juste added.
+
+You should end up with something like this:
+
+```ts
+const mockClient = {
+  database: () => ({
+    container: () => ({
+      items: {
+        create: () => ({
+          resource: {
+            id: '123',
+            userId: '123',
+            title: 'test',
+            completed: false
+          }
+        }),
+        query: () => ({
+          fetchAll: () => ({
+            resources: []
+          })
+        }),
+      },
+      item: () => ({
+        read: () => ({
+          resource: {
+            id: '123',
+            userId: '123',
+            title: 'test',
+            completed: false
+          }
+        }),
+        upsert: () => ({
+          resource: {
+            id: '123',
+            userId: '123',
+            title: 'test',
+            completed: true
+          }
+        }),
+        delete: () => ({})
+      }),
+    })
+  })
+};
+```
+
+Run the tests again, and... one last failure!
+
+![Screenshot of jest output showing the third test failure](./assets/jest-test-failure-3.png)
+
+That's right, Copilot mocked an `upsert()` method, but not a `replace()` method. Just rename `upsert` to `replace` and this time, all tests should pass!
+
+We've seen in this example that Copilot can help us write tests and mocks, but cannot do it all by itself. It needs some context to be able to suggest the right code, and sometimes we need to help it out a bit.
+In the end, we still have our test suite written with very little effort and time!
 
 ---
 
@@ -1109,6 +1190,11 @@ You should then see the website. Log in with your GitHub account, and you should
 ---
 
 ## Conclusion
+
+
+TODO
+we did pair program with Copilot, but it was more like we suggested what to do or fix, and Copilot did it the hard work for us.
+
 
 This is the end of the workshop. We hope you enjoyed it, learned something new and more importantly, that you'll be able to take this knowledge back to your projects.
 
