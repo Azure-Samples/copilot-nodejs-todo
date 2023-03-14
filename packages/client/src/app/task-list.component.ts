@@ -10,7 +10,7 @@ import { TaskItemComponent } from './task-item.component';
   imports: [CommonModule, TaskItemComponent],
   template: `
     <app-task-item 
-      *ngFor="let task of tasks; trackBy: trackByDescription"
+      *ngFor="let task of tasks; trackBy: trackByTitle"
       [task]="task"
       (toggleCompleted)="toggleCompleted.emit(task)"
     ></app-task-item>
@@ -37,7 +37,7 @@ export class TaskListComponent {
   @Input() tasks: Task[] = [];
   @Output() toggleCompleted = new EventEmitter<Task>();
 
-  trackByDescription(_index: number, task: Task) {
-    return task.description;
+  trackByTitle(_index: number, task: Task) {
+    return task.title;
   }
 }

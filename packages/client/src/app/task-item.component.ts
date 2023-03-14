@@ -10,7 +10,7 @@ import { Task } from './task';
   template: `
     <label>
       <input type="checkbox" [checked]="task.completed" (change)="toggleCompleted.emit(!task.completed)" />
-      {{ task.description }}
+      {{ task.title }}
     </label>
   `,
   styles: [`
