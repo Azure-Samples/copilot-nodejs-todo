@@ -19,10 +19,12 @@ sections_title:
 
 In this workshop, we'll explore how GitHub Copilot can be used to accelerate the development and deployment of a Node.js application. 
 
-MyTodo is an [Express](https://expressjs.com/) app implementing a Todo list application. The application is mostly done, but needs a data service to talk to [Azure Cosmos DB](TODO) so we can store and retrieve the data. We also need to write some documentation, complete the tests and connect it to our API. Finally, we'll setup a CI/CD pipeline to deploy our app to [Azure App Service](TODO), using [GitHub Actions](TODO).
+MyTodo is an [Express](https://expressjs.com/) app implementing a Todo list application. The application is mostly done, but needs a data service to talk to [Azure Cosmos DB](https://azure.microsoft.com/services/cosmos-db/) so we can store and retrieve the data. We also need to write some documentation, complete the tests and connect it to our API. Finally, we'll setup a CI/CD pipeline to deploy our app to [Azure App Service](https://azure.microsoft.com/services/app-service/), using [GitHub Actions](https://github.com/features/actions).
 
-## You'll learn how to...
-- Use [GitHub Copilot](TODO) to assist you in writing code, tests and documentation
+## Objectives
+
+You'll learn how to:
+- Use [GitHub Copilot](https://github.com/features/copilot) to assist you in writing code, tests and documentation
 - Create a data service to connect to Azure Cosmos DB
 - Setup a CI/CD pipeline with GitHub Actions
 - Deploy a Node.js app to Azure App Service
@@ -155,7 +157,7 @@ api.http          # HTTP requests to test our API
 package.json      # NPM workspace configuration
 ```
 
-As we'll be using Node.js to build our API and website, we had setup a [NPM workspace](https://docs.npmjs.com/cli/using-npm/workspaces) to manage the dependencies of all the projects in a single place. This means that when you run `npm install` in the root of the project, it will install all the dependencies of all the projects and make it easier to work in a monorepo.
+As we'll be using Node.js to build our API and website, we've setup a [NPM workspace](https://docs.npmjs.com/cli/using-npm/workspaces) to manage the dependencies of all the projects in a single place. This means that when you run `npm install` in the root of the project, it will install all the dependencies of all the projects and make it easier to work in a monorepo.
 
 For example, you can run `npm run <script_name> --workspaces` in the root of the project to run a script in all the projects, or `npm run <script_name> --workspace=packages/server` to run a script for a specific project. 
 
@@ -177,7 +179,7 @@ The only changes we made to the generated code is to remove the files we don't n
 
 ## Adding CosmosDB to your project
 
-Our Todo application is almost complete! We need to add a database to store the tasks, and we'll use [Azure Cosmos DB](https://azure.microsoft.com/services/cosmos-db/) to do that, with the assistance of GitHub Copilot.
+Our Todo application is *almost* complete. We need to add a database to store the tasks, and we'll use [Azure Cosmos DB](https://azure.microsoft.com/services/cosmos-db/) to do that, with the assistance of GitHub Copilot.
 
 ### About Azure Cosmos DB
 
@@ -197,7 +199,7 @@ npm install @azure/cosmos
 Once it's installed the package, create a new file `packages/server/src/services/db.ts` and start typing the following content in it:
 
 ```ts
-// Import the Cosmos SDK
+// Import Cosmos SDK and task model
 ```
 
 As soon as you finish typing and hit enter, Copilot will suggest the import for you:
@@ -205,29 +207,33 @@ As soon as you finish typing and hit enter, Copilot will suggest the import for 
 TODO
 ![Screenshot of VS Code showing Copilot suggesting the import](./assets/copilot-import.png)
 
-<details>
-<summary>Example Copilot suggestion</summary>
-
-```ts
-import { CosmosClient } from '@azure/cosmos';
-```
-
-</details>
-
 <div class="tip" data-title="tip">
 
 > If you have everything setup correctly, you should see the GitHub Copilot icon in the bottom right corner of your editor changing to a spinner as you type. If you don't see it, make sure you have the [GitHub Copilot extension](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot) installed and enabled.
 
 </div>
 
-Accept the suggestion by hitting the `Tab` key, and then continue by adding the following comment:
+<details>
+<summary>Example Copilot suggestions</summary>
+
+```ts
+import { CosmosClient } from '@azure/cosmos';
+import { Task } from "../models/task";
+```
+
+</details>
+
+Accept the suggestion by hitting the `Tab` key, hit `Enter` and accept the next suggestion again if needed to have both the imports we need.
+
+Then continue by adding the following comment:
 
 ```ts
 // Create a DbService class to wrap the Cosmos SDK,
 // connecting to the 'todos' database and 'tasks' container
+// and with CRUD methods for tasks
 ```
 
-After hitting enter, Copilot should suggest a complete class definition for you!
+After hitting enter, and accept the suggestions as they come: Copilot should suggest a complete class definition for you!
 
 <details>
 <summary>Example Copilot suggestion</summary>
@@ -239,58 +245,57 @@ export class DbService {
   private container: any;
 
   constructor() {
-    // Connect to Cosmos DB
+    // Connect to the database
     this.client = new CosmosClient({
       endpoint: process.env.COSMOS_ENDPOINT,
-      key: process.env.COSMOS_KEY,
+      key: process.env.COSMOS_KEY
     });
-
-    // Create a database
     this.database = this.client.database("todos");
-
-    // Create a container
     this.container = this.database.container("tasks");
   }
 
-  // Create a function to get all tasks
-  async getTasks() {
-    const { resources: tasks } = await this.container.items
-      .query({
-        query: "SELECT * from c",
-      })
-      .fetchAll();
+  // Create a new task
+  async createTask(task: Task): Promise<Task> {
+    // Create a new task in the database
+    const { resource: createdItem } = await this.container.items.create(task);
 
-    return tasks;
+    // Return the new task
+    return createdItem;
   }
 
-  // Create a function to get a task by id
-  async getTask(id: string) {
+  // Get a task by id
+  async getTask(id: string): Promise<Task> {
+    // Get the task from the database
     const { resource: task } = await this.container.item(id).read();
 
+    // Return the task
     return task;
   }
 
-  // Create a function to create a task
-  async createTask(task: any) {
-    const { resource: createdTask } = await this.container.items.create(task);
+  // Get all tasks
+  async getTasks(): Promise<Task[]> {
+    // Get all tasks from the database
+    const { resources: tasks } = await this.container.items.readAll().fetchAll();
 
-    return createdTask;
+    // Return the tasks
+    return tasks;
   }
 
-  // Create a function to update a task
-  async updateTask(id: string, task: any) {
-    const { resource: updatedTask } = await this.container
-      .item(id)
+  // Update a task
+  async updateTask(task: Task): Promise<Task> {
+    // Update the task in the database
+    const { resource: updatedItem } = await this.container
+      .item(task.id)
       .replace(task);
 
-    return updatedTask;
+    // Return the updated task
+    return updatedItem;
   }
 
-  // Create a function to delete a task
-  async deleteTask(id: string) {
-    const { resource: deletedTask } = await this.container.item(id).delete();
-
-    return deletedTask;
+  // Delete a task
+  async deleteTask(id: string): Promise<void> {
+    // Delete the task from the database
+    await this.container.item(id).delete();
   }
 }
 ```
@@ -299,7 +304,7 @@ export class DbService {
 
 <div class="info" data-title="note">
 
-> Copilot generates new code for you dynamically, so the suggestion you get might be a bit different from the one shown here. But the idea is the same: it's a complete class definition with all the functions you need to implement the database service.
+> Copilot generates new code for you dynamically, so the suggestion you get might be a bit different from the one shown here. But the idea is the same: it's a complete class definition with all the functions you need to implement the database service. If the suggestion is not to your liking, you can also cycle between differents suggestions using `Alt+]` (`Option+]` on macOS).
 
 </div>
 
@@ -307,7 +312,11 @@ Accept the suggestion, then if we look at the details, Copilot generated for you
 - A class definition with a constructor that connects to the Cosmos DB instance, and creates the database and container if they don't exist.
 - All create, read, update, and delete (CRUD) operations for the tasks
 
-How awesome is that? But wait, it seems that TypeScript is complaining about the `process.env.COSMOS_ENDPOINT` and `process.env.COSMOS_KEY` variables being possibly undefined. Let's fix that, again using Copilot. At the beginning of the class constructor, add this comment:
+How awesome is that?
+
+### Fixing the code
+
+But wait, it seems that TypeScript is complaining about the `process.env.COSMOS_ENDPOINT` and `process.env.COSMOS_KEY` variables being possibly undefined. Let's fix that, again using Copilot. At the beginning of the class constructor, add this comment:
 
 ```ts
 // Check that the environment variables are set
@@ -329,14 +338,41 @@ if (!process.env.COSMOS_KEY) {
 
 </details>
 
+Now look at the different methods Copilot generated for us. While it all looks correct, we would like to change the `getTasks()` method so that it only returns the tasks for a specified user ID.
+
+To do that, replace the `// Get all tasks` comment above the function with `// Get all tasks for a user`.
+Delete the `getTasks()` method entirely, and let Copilot generate it again for us. It will suggest new code line by line, accept the suggestions as they come until the function is complete.
+
+<details>
+<summary>Example Copilot suggestion</summary>
+
+```ts
+async getTasks(userId: string): Promise<Task[]> {
+  // Get the tasks from the database
+  const { resources: tasks } = await this.container
+    .items.query({
+      query: "SELECT * FROM c WHERE c.userId = @userId",
+      parameters: [{ name: "@userId", value: userId }]
+    })
+    .fetchAll();
+
+  // Return the tasks
+  return tasks;
+}
+```
+
+</details>
+
 The final result should look like this:
 
 ```ts
-// Import Cosmos SDK
+// Import Cosmos SDK and task model
 import { CosmosClient } from "@azure/cosmos";
+import { Task } from "../models/task";
 
 // Create a DbService class to wrap the Cosmos SDK,
 // connecting to the 'todos' database and 'tasks' container
+// and with CRUD methods for tasks
 export class DbService {
   private client: CosmosClient;
   private database: any;
@@ -351,63 +387,67 @@ export class DbService {
       throw new Error("COSMOS_KEY is not set");
     }
 
-    // Connect to Cosmos DB
+    // Connect to the database
     this.client = new CosmosClient({
       endpoint: process.env.COSMOS_ENDPOINT,
-      key: process.env.COSMOS_KEY,
+      key: process.env.COSMOS_KEY
     });
-
-    // Create a database
     this.database = this.client.database("todos");
-
-    // Create a container
     this.container = this.database.container("tasks");
   }
 
-  // Create a function to get all tasks
-  async getTasks() {
-    const { resources: tasks } = await this.container.items
-      .query({
-        query: "SELECT * from c",
-      })
-      .fetchAll();
+  // Create a new task
+  async createTask(task: Task): Promise<Task> {
+    // Create a new task in the database
+    const { resource: createdItem } = await this.container.items.create(task);
 
-    return tasks;
+    // Return the new task
+    return createdItem;
   }
 
-  // Create a function to get a task by id
-  async getTask(id: string) {
+  // Get a task by id
+  async getTask(id: string): Promise<Task> {
+    // Get the task from the database
     const { resource: task } = await this.container.item(id).read();
 
+    // Return the task
     return task;
   }
 
-  // Create a function to create a task
-  async createTask(task: any) {
-    const { resource: createdTask } = await this.container.items.create(task);
+  // Get all tasks for a user
+  async getTasks(userId: string): Promise<Task[]> {
+    // Get the tasks from the database
+    const { resources: tasks } = await this.container
+      .items.query({
+        query: "SELECT * FROM c WHERE c.userId = @userId",
+        parameters: [{ name: "@userId", value: userId }]
+      })
+      .fetchAll();
 
-    return createdTask;
+    // Return the tasks
+    return tasks;
   }
 
-  // Create a function to update a task
-  async updateTask(id: string, task: any) {
-    const { resource: updatedTask } = await this.container
-      .item(id)
+  // Update a task
+  async updateTask(task: Task): Promise<Task> {
+    // Update the task in the database
+    const { resource: updatedItem } = await this.container
+      .item(task.id)
       .replace(task);
 
-    return updatedTask;
+    // Return the updated task
+    return updatedItem;
   }
 
-  // Create a function to delete a task
-  async deleteTask(id: string) {
-    const { resource: deletedTask } = await this.container.item(id).delete();
-
-    return deletedTask;
+  // Delete a task
+  async deleteTask(id: string): Promise<void> {
+    // Delete the task from the database
+    await this.container.item(id).delete();
   }
 }
 ```
 
-Of course, the code is not perfect, as for example the `deleteTask` does not need to return anything, and it's missing some type definitions. But it's a good start, and we can improve it later. Keeping in mind that we only had to write a few comments to get a working database service, it's pretty amazing! And we didn't even had to go read the documentation of the Cosmos SDK.
+Of course, the code might not perfect (remember that the suggestions you get may be a bit different), but it's a good start given the little effort we had to put in. It's missing some type definitions, but keeping in mind that we only had to write a few comments to get a working database service, it's pretty amazing! And we didn't even had to go read the documentation of the Cosmos SDK.
 
 ### Adding documentation
 
@@ -418,26 +458,24 @@ Just before the `DbService` class definition, remove this comment that we added 
 ```ts
 // Create a DbService class to wrap the Cosmos SDK,
 // connecting to the 'todos' database and 'tasks' container
+// and with CRUD methods for tasks
 ```
 
-And instead, start typing `/**` to add a JSDoc comment, and hit enter. Copilot will start suggesting the documentation for the class. Hit `Tab` then `Enter` to accept the suggestions as they come, until the documentation is complete. You should end up with something like this:
+And instead, start typing `/**` to add a JSDoc comment, and hit enter. Copilot will start suggesting the documentation for the class. You may start tying `This` and hit `Tab` then `Enter` to accept the suggestions as they come, until the documentation is complete. You should end up with something like this:
 
 ```ts
 /**
- * This class is responsible for connecting to Cosmos DB and
- * performing CRUD operations on the database and container.
- * It is a singleton class, so only one instance of it will
- * exist at any given time.
+ * This class provides a service for interacting with the Cosmos DB database.
+ * It is a singleton class, so only one instance of it will ever exist.
  * @class
- * @property {CosmosClient} client - The CosmosClient instance
- * @property {any} database - The database instance
- * @property {any} container - The container instance
- * @method getTasks - Get all tasks
+ * @property {CosmosClient} client - The Cosmos DB client
+ * @property {any} database - The database
+ * @property {any} container - The container
+ * @method createTask - Create a new task
  * @method getTask - Get a task by id
- * @method createTask - Create a task
+ * @method getTasks - Get all tasks for a user
  * @method updateTask - Update a task
  * @method deleteTask - Delete a task
- * @returns {DbService} - The DbService instance
  */
 ```
 
@@ -454,83 +492,197 @@ private container: any;
 Wow, now it even suggests you the comments! Accept that and continue, until you get what we need. You should end up with something like this:
 
 ```ts
-// Create a static instance of the class
+// The singleton instance
 private static instance: DbService;
 
-// Create a static method to get the instance
-public static getInstance() {
+// Get the singleton instance
+public static getInstance(): DbService {
   if (!DbService.instance) {
     DbService.instance = new DbService();
   }
-
   return DbService.instance;
 }
 ```
 
 Don't you agree that this looks like black magic? We didn't even tell Copilot what we wanted, and it just gave us the code we needed. How useful is that?
 
-Let's move on to the next step.
+### (Optional) Fixing missing types with Copilot Labs
 
----
+Our database service is now almost perfect, but there's still one thing that bothers me: the types. We're using `any` for the `database` and `container` properties, which is not ideal. We could go back to the Cosmos SDK documentation and try to find the right types, but that would be a lot of work. Let's see if Copilot can help us with that.
 
-### Adding tests
+In the VS Code toolbar, select the `Copilot Labs` tab:
 
-We're now ready to test our whole application locally. To do so, we need to start in parallel the SWA CLI and the Docker compose environment with our services.
+![Screenshot of Copilot Labs tab in VS Code](./assets/copilot-labs.png)
 
-To make this easier, we already set up a few script in the `package.json` located at the root of the project.
+Select the two problematic lines in your code:
 
-```json
-  "scripts": {
-    "start": "concurrently npm:start:* --kill-others",
-    "start:services": "docker compose up",
-    "start:website": "npm run start --workspace=website",
-  },
+```ts
+private database: any;
+private container: any;
 ```
 
-Here's what each script does:
-- `start` uses [concurrently](https://www.npmjs.com/package/concurrently) package to run multiple scripts in parallel, here we use it to start all the NPM scripts matching the `start:*` pattern
-- `start:services` starts the Docker compose environment with our services
-- `start:website` starts the SWA CLI with our website
+Once they're highlighted, click on the **Add types** button in the **Brushes** panel:
 
-In short, we can start our complete application locally by running `npm start` at the root of the project:
+![Screenshot of Copilot Labs brushes panel in VS Code highlighting the "Add Types" button](./assets/copilot-labs-add-types.png)
 
-```bash
-# Go back to the project's root
-cd ../..
-npm start
+Copilot will now try to find the right types for your variables. It will take a few seconds, but once it's done, you should see something like this:
+
+```ts
+private database: Database;
+private container: Container;
 ```
 
-This may take a few seconds to start everything, but after a while VS Code should propose you to open the application running on port `4280` in your browser:
+<div class="info" data-title="note">
 
-![Screenshot of VS Code showing "Open in Browser" dialog](./assets/vscode-open-browser.png)
-
-Select **Open in Browser** to open the website.
-
-<div class="tip" data-title="tip">
-
-> If you don't see the dialog, you can select the **Ports** tab in the bottom panel, and click on the "Local Address" link next to port `4280`:
->
-> ![Screenshot of VS Code showing the Ports panel](./assets/vscode-ports.png)
+> Copilot Labs is still in beta, so it might not work perfectly every time. If it doesn't, you can always use `CTRL+Z` (`CMD+Z` on macOS) to undo the changes, and try again.
 
 </div>
 
-You should see the login page of our application:
+TypeScript is showing us an error now, because we're using the `Database` and `Container` types from the Cosmos SDK, but we didn't import them. Click on the blue lightbulb to open VS Code's quick fixes options, and select **Add all missing imports**:
 
-![Screenshot of the login page](./assets/app-login.png)
+![Screenshot of VS Code ](./assets/vscode-auto-import.png)
 
-If you select **Login**, you'll be redirected to the SWA CLI authentication emulator login page:
+Oh no, once we do that we get new errors! It seems that the return types of the `createTask()` and `updateTask()` methods are wrong. Replace `Promise<Task>` with `Promise<Task | undefined>` for both methods, and you should be good to go.
 
-![Screenshot of the SWA CLI login page](./assets/swa-cli-auth.png)
+Thanks for the catch, TypeScript! 🙏
 
-This is a fake login page made for local testing, where you can enter various parameters to simulate different users. Fill in any **Username** and select **Login**.
+---
 
-You should be redirected back to the application main UI:
+## Adding unit tests
 
-![Screenshot of the application main UI](./assets/app-ui.png)
+We now have a working database service, but we don't have any tests for it. We're good developers, so we should always write tests for our code. Let's see how Copilot can help us with that.
 
-You can now test the application as you would normally do, trying to update your settings, roll the dice, etc.
+First, create a new file `packages/server/src/services/db.spec.ts` and add the following code:
 
-After you're done testing, you can stop the application by pressing `Ctrl+C` in the terminal.
+```ts
+import { DbService } from './db';
+
+jest.mock('@azure/cosmos');
+
+describe('DbService', () => {
+  beforeAll(() => {
+    // Set environment variables
+    process.env.COSMOS_ENDPOINT = 'dummy';
+    process.env.COSMOS_KEY = '123';
+
+  });
+
+  it('should get all tasks for a user', async () => {
+    const dbService = new DbService();
+    const tasks = await dbService.getTasks('123');
+    expect(tasks).toEqual([]);
+  });
+
+});
+```
+
+<div class="tip" data-title="tip">
+
+> We're using [Jest](https://jestjs.io/) as our test framework. If you're not familiar with it, don't worry, we won't go into too much details here. You can read more about it in the [Jest documentation](https://jestjs.io/docs/getting-started).
+
+</div>
+
+We've prepared a few things here. We're mocking the Cosmos SDK as we don't want to use the real thing, and we're setting the environment variables needed by the `DbService` class. Then we wrote a first test for the `getTasks()` method.
+
+First, let's add a few more tests. Put your cursor at the end of the `describe()` function, and hit `Enter` to create a new test.
+
+![Screenshot of Copilot suggesting a new test](./assets/copilot-test-suggestion.png)
+
+If you continue acceptiong Copilot's suggestions, you should end up with a complete test suite for all the methods of the `DbService` class. Note that sometimes Copilot needs a little help to close the final parentheses for each test! We may sometimes think that it has a mind of its own, just making sure you're paying attention 😉.
+
+<details>
+<summary>Example Copilot suggestions</summary>
+
+```ts
+it('should create a new task', async () => {
+  const dbService = new DbService();
+  const task = await dbService.createTask({
+    id: '123',
+    userId: '123',
+    title: 'test',
+    completed: false
+  });
+  expect(task).toEqual({
+    id: '123',
+    userId: '123',
+    title: 'test',
+    completed: false
+  });
+});
+
+it('should get a task by id', async () => {
+  const dbService = new DbService();
+  const task = await dbService.getTask('123');
+  expect(task).toEqual({
+    id: '123',
+    userId: '123',
+    title: 'test',
+    completed: false
+  });
+});
+
+it('should update a task', async () => {
+  const dbService = new DbService();
+  const task = await dbService.updateTask({
+    id: '123',
+    userId: '123',
+    title: 'test',
+    completed: true
+  });
+  expect(task).toEqual({
+    id: '123',
+    userId: '123',
+    title: 'test',
+    completed: true
+  });
+});
+
+it('should delete a task', async () => {
+  const dbService = new DbService();
+  const task = await dbService.deleteTask('123');
+  expect(task).toEqual({
+    id: '123',
+    userId: '123',
+    title: 'test',
+    completed: true
+  });
+});
+```
+
+</details>
+
+
+Since we've mocked the Cosmos SDK completely, all the tests should fail.
+Run the following command in a terminal to launch the tests:
+
+```bash
+npm test
+```
+
+As expected, it fails.
+
+### Mocking Cosmos SDK methods
+
+To make it work, we need to now properly implement mocks for the Cosmos SDK methods.
+Put your cursor at the end of the `beforeAll()` function, and hit `Enter`.
+
+![Screenshot of Copilot suggesting mocking the Cosmos SDK](./assets/copilot-mock-suggestion.png)
+
+Wow, Copilot seems to know what we want to do! Let's accept this comment.
+This time, instead of accepting the first suggestion, let's open the **Copilot toolbar** to see all the suggestions and pick the one that looks best to us.
+
+![Screenshot of Copilot toolbar](./assets/copilot-toolbar.png)
+
+A new panel should open on the right side of the screen, where you can scroll through all the suggestions Copilot has for you. Once you've found the one you like, click on **Accept solution** to insert the code and close the panel.
+
+Save the file, and run the tests again. Oh no, 4 of the 5 tests are still failing! Let's see what's going on.
+
+Scroll up to see the first test failure, and you should see that `fetchAll()` is not a function, meaning that it's not mocked properly. Let's fix that.
+
+![Screenshot of jest output showing the first test failure](./assets/jest-test-failure.png)
+
+
+
 
 ---
 
@@ -710,254 +862,6 @@ If you're curious, you can have a look at the script to see how it works, and re
 
 </div>
 
-## Connecting database
-
-
-### Adding database to the Settings service
-
-Then we'll make some changes to file `packages/settings-api/plugins/database.js` we created earlier. First, we need to add an import for the `@azure/cosmos` package:
-
-```js
-import { CosmosClient } from '@azure/cosmos';
-```
-
-Next, we'll add a new `Database` at the bottom of the file:
-
-```js
-class Database {
-  constructor(connectionString) {
-    this.client = new CosmosClient(connectionString)
-  }
-
-  async init() {
-    const { database } = await this.client.databases.createIfNotExists({
-      id: 'settings-db'
-    });
-    const { container } = await database.containers.createIfNotExists({
-      id: 'settings'
-    });
-    this.settings = container;
-  }
-
-  async saveSettings(userId, settings) {
-    await this.settings.items.upsert({ id: userId, settings });
-  }
-  
-  async getSettings(userId) {
-    const { resource } = await this.settings.item(userId).read();
-    return resource?.settings;
-  }
-}
-```
-
-We're using the `@azure/cosmos` SDK to implement the same methods `saveSettings()` and `getSettings()` we used in our in-memory database.
-
-In addition, we added a new method `init()` that we use to create the database and the container if they don't exist yet. Because the SDK functions called here are asynchronous, we could not use the class constructor for that.
-
-Because Azure Cosmos DB is a NoSQL database, besides creating a database in our account, we also need to create a container to store the data. A container is a place to store a collection of documents, called **items** here.
-
-Finally, we need to update how we register the database plugin. Replace the whole function `export default fp(async function (fastify, opts) { ... }` with:
-  
-```javascript
-export default fp(async function (fastify, opts) {
-  const connectionString = process.env.DATABASE_CONNECTION_STRING;
-  if (connectionString) {
-    const db = new Database(connectionString);
-    await db.init();
-    fastify.decorate('db', db);
-    fastify.log.info('Connection to database successful.');
-  } else {
-    fastify.decorate('db', new MockDatabase());
-    fastify.log.warn('No DB connection string provided, using mock database.');
-  }
-});
-```
-
-Here we're checking if the `DATABASE_CONNECTION_STRING` environment variable is set. In that case, we create a new `Database` instance and initialize it. Otherwise, we use the `MockDatabase` we created earlier.
-
-#### Testing the database connection
-
-We can now test the database connection. For that, we need to retrieve the connection string for the database.
-As it's located in the `.azure/.prod.env` file created when we deployed the infrastructure, we can use this command to export it as an environment variable:
-
-```bash
-source ../../.azure/.prod.env
-export DATABASE_CONNECTION_STRING
-```
-
-Then we can start the Settings service:
-
-```bash
-npm start | pino-pretty
-```
-
-If you see the message `Connection to database successful` in the console logs, the connection is working. You can test the API as usual, using the `api.http` file.
-
-When you checked that everything is working, stop the server by pressing `Ctrl+C` in the terminal.
-
-### Adding database to the Dice service
-
-Now we'll do the same for the Dice service. Again, we need to install the `@azure/cosmos` package:
-
-```bash
-cd ../dice-api
-npm install @azure/cosmos
-```
-
-Then we'll update the file `packages/dice-api/src/db.service.ts`. First, add this import of the `@azure/cosmos` package:
-
-```ts
-import { Container, CosmosClient } from '@azure/cosmos';
-```
-
-Then rename the existing `DbService` class to `MockDbService`.
-
-After than, add this new `DbService` class at the bottom of the file:
-
-```ts
-@Injectable()
-export class DbService {
-  client: CosmosClient;
-  rolls: Container;
-
-  constructor(connectionString: string) {
-    this.client = new CosmosClient(connectionString)
-  }
-
-  async init() {
-    const { database } = await this.client.databases.createIfNotExists({
-      id: 'dice-db',
-    });
-    const { container } = await database.containers.createIfNotExists({
-      id: 'rolls',
-    });
-    this.rolls = container;
-  }
-
-  async addRoll(roll: Roll) {
-    await this.rolls.items.create(roll);
-  }
-
-  async getLastRolls(max: number, sides: number) {
-    const { resources } = await this.rolls.items
-      .query({
-        query: `SELECT TOP @max * from r WHERE r.sides = @sides ORDER BY r.timestamp DESC`,
-        parameters: [
-          { name: '@sides', value: sides },
-          { name: '@max', value: max },
-        ],
-      })
-      .fetchAll();
-    return resources.sort((a, b) => a.timestamp - b.timestamp);
-  }
-}
-```
-
-We're doing here something very similar to what we did for the Settings service. We're using the `@azure/cosmos` SDK to implement the same methods `addRoll()` and `getLastRolls()` we used in our in-memory database, and added a new method `init()` to create the database and container if they don't exist yet.
-
-If we take a look at the `getLastRolls()` method, we can see something interesting. We're using a SQL query to retrieve the last rolls. Notice that it's a [parameterized query](https://learn.microsoft.com/azure/cosmos-db/nosql/query/parameterized-queries), using the `max` and `sides` parameters of the function. While using a template string like:
-```js
-`SELECT TOP ${max} * from r WHERE r.sides = ${sides} ORDER BY r.timestamp DESC`
-```
-would be working, it's not safe against SQL injection attacks because it's comes from user input. Using parameterized queries is the recommended way to prevent these kind of attacks, as the parameters will be properly escaped by the SDK.
-
-You can also notice that at the end of the function, we're sorting the results by timestamp. In the SQL query, we're using a reverse `ORDER BY` to get the last rolls, but we need to sort them again in the code to get them in the right order. This is one limitation of the SQL language support by Azure Cosmos DB, as it's not possible to use a subquery here to sort the results.
-
-Finally, we need to update the file `app.module.ts`. In the `providers`, replace the existing `DbService` with this code:
-
-```ts
-{
-  provide: DbService,
-  useFactory: async () => {
-    const logger = new Logger(DbService.name);
-    const connectionString = process.env.DATABASE_CONNECTION_STRING;
-    if (connectionString) {
-      const db = new DbService(connectionString);
-      await db.init();
-      logger.log('Connection to database successful.');
-      return db;
-    }
-    logger.warn('No DB connection string provided, using mock database.');
-    return new MockDbService();
-  },
-}
-```
-
-Instead of using a standard provider, we're using a [factory](https://docs.nestjs.com/fundamentals/custom-providers#factory-providers-usefactory) to create our provider dynamically. A factory provider is a function that returns the actual provider.
-
-In the same fashion as the Settings service, we're checking if the `DATABASE_CONNECTION_STRING` environment variable is set, and if it is, we're creating a `DbService` instance with the connection string, otherwise we create a `MockDbService` instance instead.
-
-After that, we need to update two imports. Replace:
-
-```ts
-import { Module } from '@nestjs/common';
-// ...
-import { DbService } from './db.service';
-```
-
-with
-
-```ts
-import { Module, Logger } from '@nestjs/common';
-// ...
-import { DbService, MockDbService } from './db.service';
-```
-
-You may still a few errors in the code due to formatting, but it can be fixed automatically the command:
-
-```bash
-npm run format
-```
-
-#### Testing the database connection
-
-We can now test the database connection. Just like with the Settings API, we can retrieve the connection string for the database with this command:
-
-```bash
-source ../../.azure/.prod.env
-export DATABASE_CONNECTION_STRING
-```
-
-Then start the Dice service:
-
-```bash
-npm start | pino-pretty
-```
-
-If you see the message `Connection to database successful` in the console logs, the connection is working. Again, you can test the API using the `api.http` file.
-
-When you checked that everything is working, stop the server by pressing `Ctrl+C` in the terminal.
-
-### Looking at the data
-
-By now you should have some data in your database. Sometimes, it can be interesting to look at the data directly in the database, for example to check if the data is correct, or to debug an issue.
-
-We can do that directly using VS Code, thanks to the [Azure Databases extension](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-cosmosdb).
-
-First, let's get our connection string. In a terminal run this command and copy the output:
-
-```bash
-echo $DATABASE_CONNECTION_STRING
-```
-
-Then select the **Azure icon** in the left panel, then click **Attach Database Account** under the Workspace panel:
-
-![Screenshot of Azure Databases extension showing how to connect to a database](./assets/vscode-connect-database.png)
-
-Select **SQL** for the **Database type**, then paste the connection string and press **Enter**.
-
-You should now see your database account in the panel. You can unfold it to see the databases, containers and items. If you select a document, you can see its content of the document in the right panel, and even edit it.
-
-![Screenshot of Azure Databases extension showing the content of a document](./assets/vscode-document-content.png)
-
----
-
-<div class="info" data-title="skip notice">
-
-> If you want to skip the Docker compose details and jump directly to the next section, run this command in the terminal to get the completed code directly: `curl -fsSL https://github.com/Azure-Samples/nodejs-microservices/releases/download/latest/deploy.tar.gz | tar -xvz`
-Then commit and push the changes to trigger the deployment.
-
-</div>
 
 ## Adding CI/CD
 
@@ -1208,11 +1112,9 @@ You should then see the website. Log in with your GitHub account, and you should
 
 This is the end of the workshop. We hope you enjoyed it, learned something new and more importantly, that you'll be able to take this knowledge back to your projects.
 
-If you missed any of the steps or would like to check your final code, you can run this command in the terminal to get the completed solution (be sure to commit your code first!): `curl -fsSL https://github.com/Azure-Samples/nodejs-microservices/releases/download/latest/solution.tar.gz | tar -xvz`
-
 <div class="warning" data-title="had issues?">
 
-> If you experienced any issues during the workshop, please let us know by [creating an issue](https://github.com/Azure-Samples/nodejs-microservices/issues) on the GitHub repository.
+> If you experienced any issues during the workshop, please let us know by [creating an issue](https://github.com/Azure-Samples/copilot-nodejs-todo/issues) on the GitHub repository.
 
 </div>
 
@@ -1233,12 +1135,12 @@ To delete the Azure resources, you can run this command:
 Or directly use the Azure CLI:
 
 ```bash
-az group delete --name rg-node-microservices-prod
+az group delete --name rg-copilot-nodejs-todo-prod
 ```
 
 ### References
 
-- This workshop URL: [aka.ms/ws/node-microservices](https://aka.ms/ws/node-microservices)
-- The source repository for this workshop: [GitHub link](https://github.com/Azure-Samples/nodejs-microservices)
-- The base template for this workshop: [GitHub link](https://github.com/Azure-Samples/nodejs-microservices-template)
-- If something does not work: [Report an issue](https://github.com/Azure-Samples/nodejs-microservices/issues)
+- This workshop URL: [aka.ms/ws/copilot-todo](https://aka.ms/ws/copilot-todo)
+- The source repository for this workshop: [GitHub link](https://github.com/Azure-Samples/copilot-nodejs-todo)
+- The base template for this workshop: [GitHub link](https://github.com/Azure-Samples/copilot-nodejs-todo-template)
+- If something does not work: [Report an issue](https://github.com/Azure-Samples/copilot-nodejs-todo/issues)
