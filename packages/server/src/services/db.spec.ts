@@ -1,5 +1,4 @@
 import { DbService } from './db';
-import { Task } from '../models/task';
 
 jest.mock('@azure/cosmos');
 
@@ -10,8 +9,6 @@ describe('DbService', () => {
     process.env.COSMOS_KEY = '123';
 
     // Mock the Cosmos DB client
-    
-
     const mockClient = {
       database: () => ({
         container: () => ({
