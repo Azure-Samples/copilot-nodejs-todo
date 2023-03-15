@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-
 import { Task } from './task';
 import { getTasks, addTask, setTaskCompleted, TaskFilter } from './task.service';
 import { TaskFilterComponent } from './task-filter.component';
