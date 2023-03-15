@@ -52,7 +52,7 @@ Before starting the development, we'll need to setup our project and development
 - Creating a new project on GitHub based on a template
 - Using a prepared dev container environment on either [GitHub Codespaces](https://github.com/features/codespaces) or [VS Code with Dev Containers extension](https://aka.ms/vscode/ext/devcontainer) (or a manual install of the needed tools)
 
-### Setting up GitHub Copilot
+### Set up GitHub Copilot
 
 To use GitHub Copilot, you need to either enroll as an individual or use Copilot for Business:   [see GitHub Copilot plans](https://github.com/features/copilot#pricing). If you're not already enrolled, you can start a free trial at the URL above.
 
@@ -60,7 +60,7 @@ Once you're enrolled, you need to sign up for the [GitHub Copilot Labs](https://
 
 To sign up, go to [GitHub Copilot Labs](https://githubnext.com/projects/copilot-labs/) and select **Sign up for Copilot Labs**. Follow the instructions to activate it on your GitHub account and you're all set!
 
-### Creating the project
+### Create the project
 
 Open [this GitHub repository](https://github.com/azure-samples/copilot-nodejs-todo-template), select the **Fork** button and click on **Create fork** to create a copy of the project in your own GitHub account.
 
@@ -78,7 +78,7 @@ This will start the creation of a dev container environment, which is a pre-conf
 
 </div>
 
-#### [optional] Working locally with the dev container
+#### [optional] Work locally with the dev container
 
 If you prefer to work locally, you can also run the dev container on your machine. If you're fine with using Codespaces, you can skip directly to the next section.
 
@@ -112,7 +112,7 @@ Once the container is ready, you will see "Dev Container: Node.js" in the bottom
 
 ![Screenshot of VS Code showing the Dev Container status](./assets/vscode-dev-container-status.png)
 
-#### [optional] Working locally without the dev container
+#### [optional] Work locally without the dev container
 
 If you want to work locally without using a dev container, you need to clone the project and install the following tools:
 
@@ -177,7 +177,7 @@ The only changes we made to the generated code is to remove the files we don't n
 
 ---
 
-## Adding CosmosDB to your project
+## Add CosmosDB to your project
 
 Our Todo application is *almost* complete. We need to add a database to store the tasks, and we'll use [Azure Cosmos DB](https://azure.microsoft.com/services/cosmos-db/) to do that, with the assistance of GitHub Copilot.
 
@@ -187,7 +187,7 @@ Azure Cosmos DB is a fully managed NoSQL database service that offers multiple A
 
 Surely, that may sound a bit strange, using SQL to access a NoSQL database? But don't worry, it's not a mistake. Cosmos DB is a *multi-model database*, which means that it can support different ways of accessing the data. SQL is the most common way of querying data, so it feels familiar to most developers and makes it easy to get started. Still, you must not forget that it's not relational database, so you can't make very complex queries and joins have to be avoided because of their performance impact.
 
-### Creating the database service
+### Create the database service
 
 First, we need to install the `@azure/cosmos` package:
 
@@ -196,7 +196,7 @@ cd packages/server
 npm install @azure/cosmos
 ```
 
-Once it's installed the package, create a new file `packages/server/src/services/db.ts` and start typing the following content in it:
+Once it's installed the package, create a new folder `packages/server/src/services/`. Inside this folder create the file `db.ts` and start typing the following content in it:
 
 ```ts
 // Import Cosmos SDK and task model
@@ -313,7 +313,7 @@ Accept the suggestion, then if we look at the details, Copilot generated for you
 
 How awesome is that?
 
-### Fixing the code
+### Fix the code
 
 But wait, it seems that TypeScript is complaining about the `process.env.COSMOS_ENDPOINT` and `process.env.COSMOS_KEY` variables being possibly undefined. Let's fix that, again using Copilot. At the beginning of the class constructor, add this comment:
 
@@ -448,7 +448,7 @@ export class DbService {
 
 Of course, the code might not perfect (remember that the suggestions you get may be a bit different), but it's a good start given the little effort we had to put in. It's missing some type definitions, but keeping in mind that we only had to write a few comments to get a working database service, it's pretty amazing! And we didn't even had to go read the documentation of the Cosmos SDK.
 
-### Adding documentation
+### Add documentation
 
 Speaking of documentation, it's always a good idea to add some comments to your code. Not only for other developers, but also for yourself when you come back to your code after a few weeks or months. Again, let's use Copilot to help us with the task.
 
@@ -505,7 +505,7 @@ public static getInstance(): DbService {
 
 Don't you agree that this looks like black magic? We didn't even tell Copilot what we wanted, and it just gave us the code we needed. How useful is that?
 
-### (Optional) Fixing missing types with Copilot Labs
+### (Optional) Fix missing types with Copilot Labs
 
 Our database service is now almost perfect, but there's still one thing that bothers me: the types. We're using `any` for the `database` and `container` properties, which is not ideal. We could go back to the Cosmos SDK documentation and try to find the right types, but that would be a lot of work. Let's see if Copilot can help us with that.
 
@@ -547,7 +547,7 @@ Thanks for the catch, TypeScript! 🙏
 
 ---
 
-## Adding unit tests
+## Add unit tests
 
 We now have a working database service, but we don't have any tests for it. We're good developers, so we should always write tests for our code. Let's see how Copilot can help us with that.
 
@@ -767,7 +767,95 @@ In the end, we still have our test suite written with very little effort and tim
 
 ---
 
-## Azure setup
+## Update API routes
+
+The database service is complete and fully tested, we can now update our API routes to use it.
+
+Open the file `packages/server/src/routes/index.ts` and take a quick look at it. We've already created all the routes we need, but the implementation is all stubbed and with `TODO` comments all over the place as we didn't have the database service ready yet.
+
+Time to remove all the *TODOs*!
+
+### Import database service
+
+First, we need to import our database service. At the top of the file, add the following line after the other imports:
+
+```ts
+import { DbService } from '../services/db';
+```
+
+### Remove stubs
+
+#### Get tasks
+
+Then, move on to our first TODO: `// TODO: get tasks from database`
+On the line below, replace the right hand side of the assignment with `await DbService.getInstance`. As you type, Copilot should complete the code for you.
+
+![Screenshot of Copilot completing the code](./assets/copilot-dbservice-1.png)
+
+Accept the suggestion, and you're done for the first TODO, you can now remove the comment.
+
+#### Create task
+
+Move on to the next TODO, `// TODO: create task in database`.
+On the line below, just type `await` and Copilot should do its magic again:
+
+![Screenshot of Copilot completing the code](./assets/copilot-dbservice-2.png)
+
+Accept the suggestion. But wait, something's missing here, we're not checking that the provided task is valid! Let's make sure the task has a `title` set before we're adding it into the database.
+
+Just before the TODO comment, add the comment `// Check that the task has a title`, hit enter and see what Copilot came up with. Accept the suggestions until it's complete.
+
+<details>
+<summary>Example Copilot suggestion</summary>
+
+```ts
+// Check that the task has a title
+if (!task.title) {
+  return res.status(400).json({ error: 'Task title is required' });
+}
+```
+
+</details>
+
+That's it copilot, just what we needed! We can remove this TODO comment and move on to the next one.
+
+#### Get a single task
+
+The next TODO is `// TODO: get task from database`.
+You know what to do now, replace the right hand part of the assignment below with `await` and let Copilot complete that for you.
+
+![Screenshot of Copilot completing the code](./assets/copilot-dbservice-3.png)
+
+Remove the TODO comment, next!
+
+#### Update task
+
+The next TODO is `// TODO: get existing task in database`.
+Same as before, replace the right hand part of the assignment below with `await` and let Copilot complete that for you.
+
+![Screenshot of Copilot completing the code](./assets/copilot-dbservice-4.png)
+
+One down, do the same thing again for the next TODO, `// TODO: update task in database`.
+
+![Screenshot of Copilot completing the code](./assets/copilot-dbservice-5.png)
+
+Remove both TODO comments, and we're done with this one.
+
+#### Delete task
+
+Last one, we'll do the same procedure again for the TODO `// TODO: delete task in database`. On the line below the comment, just type `await` and let Copilot complete it for you.
+
+![Screenshot of Copilot completing the code](./assets/copilot-dbservice-6.png)
+
+Remove the final TODO comment, and our API is now complete.
+Didn't that feel easy?
+
+### Test the API
+
+
+---
+
+## Deploy to Azure
 
 Azure is Microsoft's cloud platform. It provides a wide range of services to build, deploy, and manage applications. We'll use a few of them in this workshop to run our application.
 
@@ -1191,12 +1279,9 @@ You should then see the website. Log in with your GitHub account, and you should
 
 ## Conclusion
 
+That's it, the end of the workshop. As advertised, we *did* pair program with Copilot, but let's be honest, sometimes we felt more as the assitant as Copilot did most of the hard work for use. Like in any pair programming session, we still had to check what Copilot was doing, and guide it to the right direction. But overall, in a matter of minutes we were able to complete and deploy our application with minimal effort.
 
-TODO
-we did pair program with Copilot, but it was more like we suggested what to do or fix, and Copilot did it the hard work for us.
-
-
-This is the end of the workshop. We hope you enjoyed it, learned something new and more importantly, that you'll be able to take this knowledge back to your projects.
+We hope you enjoyed following along, learned something new and more importantly, that you'll be able to take this experience back to your projects.
 
 <div class="warning" data-title="had issues?">
 
