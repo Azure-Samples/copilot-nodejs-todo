@@ -8,40 +8,114 @@ set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
 cd ..
 
-BASE_DIR=$(pwd)
 TEMPLATE_HOME=/tmp/copilot-nodejs-todo
 GH_USER=$(git config user.name)
 TEMPLATE_REPO=https://$GH_USER:$GH_TOKEN@github.com/Azure-Samples/copilot-nodejs-todo-template.git
-TEMPLATE_BRANCH=main
 
 echo "Preparing GitHub project template..."
 rm -rf "$TEMPLATE_HOME"
 mkdir -p "$TEMPLATE_HOME"
-find . -type d -not -path '*node_modules*' -not -path '*.git/*' -not -path './packages*' -exec mkdir -p '{}' "$TEMPLATE_HOME/{}" ';'
-find . -type f -not -path '*node_modules*' -not -path '*.git/*' -not -path './packages*' -exec cp -r '{}' "$TEMPLATE_HOME/{}" ';'
+find . -type d -not -path '*node_modules*' -not -path '*.git/*' -exec mkdir -p '{}' "$TEMPLATE_HOME/{}" ';'
+find . -type f -not -path '*node_modules*' -not -path '*.git/*' -exec cp -r '{}' "$TEMPLATE_HOME/{}" ';'
 cd "$TEMPLATE_HOME"
 rm -rf .git
 git init -b main
 
-# Create projects
-./scripts/create-projects.sh
+# Prepare project template
+rm -rf .github
+rm -rf packages/server/src/services/db.*ts
+
+echo "import express from 'express';
+import { Task } from '../models/task';
+import { DbService } from '../services/db';
+
+const router = express.Router();
+
+router.get('/', async function(req, res) {
+  res.json({ message: 'server up' });
+});
+
+router.get('/users/:userId/tasks', async function(req, res) {
+  try {
+    const { userId } = req.params;
+
+    // TODO: get tasks from database
+    const tasks: Task[] = [];
+
+    res.json({ tasks });
+  } catch (error: any) {
+    res.status(500).json({ error: error?.message || 'Internal server error' });
+  }
+});
+
+router.post('/users/:userId/tasks', async function(req, res) {
+  try {
+    const { userId } = req.params;
+    const task = {
+      ...req.body,
+      userId,
+      completed: false
+    };
+
+    // TODO: create task in database
+
+    res.json(task);
+  } catch (error: any) {
+    res.status(500).json({ error: error?.message || 'Internal server error' });
+  }
+});
+
+router.get('/tasks/:taskId', async function(req, res) {
+  try {
+    const { taskId } = req.params;
+    
+    // TODO: get task from database
+    const task = {};
+
+    res.json(task);
+  } catch (error: any) {
+    res.status(500).json({ error: error?.message || 'Internal server error' });
+  }
+});
+
+router.put('/tasks/:taskId', async function(req, res) {
+  try {
+    const { taskId } = req.params;
+    
+    // TODO: get existing task in database
+    const task = {};
+    task.completed = Boolean(req.body?.completed);
+
+    // TODO: update task in database
+    const updatedTask = {};
+
+    res.json(updatedTask);
+  } catch (error: any) {
+    res.status(500).json({ error: error?.message || 'Internal server error' });
+  }
+});
+
+router.delete('/tasks/:taskId', async function(req, res) {
+  try {
+    const { taskId } = req.params;
+    
+    // TODO: delete task in database
+
+    res.sendStatus(204);
+  } catch (error: any) {
+    res.status(500).json({ error: error?.message || 'Internal server error' });
+  }
+});
+
+export default router;
+" > packages/server/src/routes/index.ts
 
 # Remove unnecessary files
 rm -rf node_modules
-rm -rf .github
 rm -rf TODO
-rm -rf docker-compose.yml
 rm -rf package-lock.json
 rm -rf scripts
 rm -rf docs
-rm -rf .azure/.*.env
-rm -rf .azure/_*.sh
-mkdir -p docs/assets
-cp "$BASE_DIR/docs/assets/architecture.drawio.png" docs/assets/architecture.drawio.png
-
-# Empty scripts
-echo -e '' > .azure/build.sh
-echo -e '' > .azure/deploy.sh
 
 if [[ ${1-} == "--local" ]]; then
   echo "Local mode: skipping GitHub push."
