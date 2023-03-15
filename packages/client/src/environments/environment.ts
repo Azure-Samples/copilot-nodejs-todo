@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  api: 'https://func-todo-api-prod-pavmt75fjq3kk.azurewebsites.net/api'
+  api: 'https://localhost:3000/api'
 };
 
 /*
