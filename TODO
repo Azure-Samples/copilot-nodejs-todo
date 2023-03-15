@@ -1,28 +1,24 @@
+- [x] setup jest
+- [x] clean up extra images
+- [ ] update api.http
 - [ ] create template repo
-- [ ] update images
-- [ ] clean up extra images
+- [ ] update missing images
+
+- [ ] script and video of the workshop
+
+## TODO
 
 
+6.	Deploy on Azure
+Step 6: Use Copilot to complete the GitHub Actions file and add action to deploy our app on Azure App Service
 
-1. Add CosmosDB to your project
-  - Create a new database service
-  - Create a Datbase class that setup the CosmosDB client, db and connection
-  - Use a comment to create methods to create, read, update and delete data
-  -
+### Azure Setup
 
+### Setup CI/CD using GitHub Actions
+- test
+- build/deploy
+  - Azure/Login
+  - Azure CLI create resource group && Azure CLI create app service plan && Azure CLI create web app
+  - App Service deploy
 
-
-Copilot – Node.js Express – CosmosDB + App Service Outline
-
-Title: Using GitHub Copilot to quickly build a Node.js application with Azure Cosmos DB and App Service.
-
-1.	Step 1: Begin by importing Cosmos DB npm package. Start by creating a new cosmos client, and specifying the database and collection. Notice that Copilot knows about settings in your .env file. Notice that copilot fills in most of the code for you and at some point can anticipate your next action. This is copilot reducing boilerplate code like connecting to a database.
-
-2.	Step 2: Use a comment to tell Copilot to create a function which retrieves all items from the database. Notice that copilot knows about the Cosmos DB SDK and can fill out most if not all of this function for you. This is copilot increasing productivity by knowing about an API that you might not be 100% familiar with.
-
-3.	Step 3: Use Copilot Labs extension to document the code that you just wrote.
-4.	Step 4: Use comment to tell Copilot to generate a unit test for your new data service.
-5.	Step 5: Use Copilot to complete existing API routes so that they use the database service we just created. Notice how Copilot understands the context of our application and does not generate out of context code.
-6.	Step 6: Use Copilot to complete the GitHub Actions file and add action to deploy our app on Azure App Service
 7.	Step 7: Deploy and view the site with the working data connection.
-Note: from my quick tests, Steps 3 and 4 are the less reliable parts, I’ll try my best to find a use case that works well most of the time
