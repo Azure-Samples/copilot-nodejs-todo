@@ -1,6 +1,6 @@
 # 🤖 copilot-nodejs-todo
 
-Discover the fundamentals of microservices architecture and how to implement them from code to production, using Node.js, Docker and Azure. You'll use [Express](https://expressjs.com/), [Fastify](https://www.fastify.io/), and [NestJS](https://nestjs.com/) to build 3 microservices, and [Vite](https://vitejs.dev/) to create the web interface of our application.
+Discover how to use GitHub Copilot to quickly build a Node.js application with Azure Cosmos DB and App Service.
 
 👉 [See the workshop](https://aka.ms/ws/copilot-todo)
 
@@ -14,11 +14,16 @@ You can also use the [Dev Containers extension for VS Code](https://aka.ms/vscod
 
 ## Project details
 
-This project is structured as monorepo and makes use of [NPM Workspaces](https://docs.npmjs.com/cli/using-npm/workspaces).
+This project is structured as monorepo and makes use of [NPM Workspaces](https://docs.npmjs.com/cli/using-npm/workspaces). It's organized as follows:
 
-Here's the application architecture schema:
-<!-- can be edited with https://draw.io -->
-![Application architecture](./docs/assets/architecture.drawio.png)
+```sh
+.devcontainer/    # Dev container configuration
+.github/          # GitHub Actions CI/CD pipeline
+packages/         # The different parts of our app
+|- server/        # The Express server, hosting the API and the website
++- client/        # The website client
+package.json      # NPM workspace configuration
+```
 
 ## How to run locally
 
@@ -27,22 +32,20 @@ npm install
 npm start
 ```
 
-This command will use [Docker Compose](https://docs.docker.com/compose/) to instantiate the 3 services, along with the [Azure Static Web Apps CLI](https://github.com/Azure/static-web-apps-cli/) emulator to run the website and authentication server.
+The application will then be available at http://localhost:4200.
 
-The application will then be available at http://localhost:4280.
-
-## How to build Docker images
+## How to build the project
 
 ```bash
-npm run docker:build
+npm run build
 ```
 
-This command will build the container images for all 3 services.
+This command will build the client and server packages.
 
 ## How to setup deployment
 
 ```bash
-./azure/setup.sh
+./setup.sh
 ```
 
 This command will ask you to log in into Azure and GitHub, then set up the `AZURE_CREDENTIALS` repository secrets for deployment.
