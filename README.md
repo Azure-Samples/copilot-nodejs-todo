@@ -29,7 +29,7 @@ package.json      # NPM workspace configuration
 
 ```bash
 npm install
-npm start
+npm run dev
 ```
 
 The application will then be available at http://localhost:4200.

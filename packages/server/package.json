@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "ts-node ./src/server.ts | pino-pretty",
-    "start:prod": "node ./lib/server.ts",
+    "start:prod": "node ./lib/server.js",
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
