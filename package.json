@@ -5,8 +5,9 @@
   "private": true,
   "scripts": {
     "start": "concurrently npm:start:* --kill-others",
-    "start:server": "npm run start --workspace=server",
-    "start:client": "npm run start --workspace=client"
+    "start:server": "npm start --workspace=server",
+    "start:client": "npm start --workspace=client",
+    "test": "npm test --workspace=server"
   },
   "author": "Yohan Lasorsa",
   "license": "MIT",
