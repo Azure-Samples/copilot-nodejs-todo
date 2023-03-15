@@ -124,7 +124,6 @@ If you want to work locally without using a dev container, you need to clone the
 | GitHub CLI    | [Get GitHub CLI](https://cli.github.com/manual/installation) |
 | pino-pretty log formatter | [Get pino-pretty](https://github.com/pinojs/pino-pretty#install) |
 | Bash v3+      | [Get bash](https://www.gnu.org/software/bash/) (Windows users can use **Git bash** that comes with Git) |
-| Perl v5+      | [Get Perl](https://www.perl.org/get.html) |
 | jq            | [Get jq](https://stedolan.github.io/jq/download) |
 | A code editor | [Get VS Code](https://aka.ms/get-vscode) |
 
@@ -136,7 +135,6 @@ node --version
 az --version
 gh --version
 bash --version
-perl --version
 jq --version
 ```
 
@@ -147,7 +145,6 @@ jq --version
 The project template you forked is a monorepo, a single repository containing multiple projects. It's organized as follows (for the most important files):
 
 ```sh
-.azure/           # Azure infrastructure templates and scripts
 .devcontainer/    # Dev container configuration
 .github/          # GitHub Actions CI/CD pipeline
 packages/         # The different parts of our app
@@ -177,7 +174,7 @@ The only changes we made to the generated code is to remove the files we don't n
 
 ---
 
-## Add CosmosDB to your project
+## Add Cosmos DB
 
 Our Todo application is *almost* complete. We need to add a database to store the tasks, and we'll use [Azure Cosmos DB](https://azure.microsoft.com/services/cosmos-db/) to do that, with the assistance of GitHub Copilot.
 
@@ -848,29 +845,40 @@ Last one, we'll do the same procedure again for the TODO `// TODO: delete task i
 ![Screenshot of Copilot completing the code](./assets/copilot-dbservice-6.png)
 
 Remove the final TODO comment, and our API is now complete.
-Didn't that feel easy?
+That wasn't much work, right?
 
-### Test the API
+<!-- ### Test the API
 
+It's now time to test our API! First we need to start the server. Run the following command in the terminal:
+
+```bash
+npm run start:server
+``` -->
 
 ---
 
 ## Deploy to Azure
 
-Azure is Microsoft's cloud platform. It provides a wide range of services to build, deploy, and manage applications. We'll use a few of them in this workshop to run our application.
+Our todo application is now complete, let's deploy it on Azure!
+
+Azure is Microsoft's cloud platform. It provides a wide range of services to build, deploy, and manage applications. We'll use [Azure App Service](https://azure.microsoft.com/products/app-service) here to deploy our app.
+
+### Create an Azure account
 
 First, you need to make sure you have an Azure account. If you don't have one, you can create a free account including Azure credits on the [Azure website](https://azure.microsoft.com/free/).
 
 <!-- <div class="important" data-title="important">
 
-> If you're following this workshop in-person at SnowCamp, you can use the following link to get a 50$ Azure Pass credit: [redeem your Azure Pass](https://azcheck.in/sno230125)
+> If you're following this workshop in-person at [CONFERENCE_NAME], you can use the following link to get a 50$ Azure Pass credit: [redeem your Azure Pass](https://azcheck.in/[EVENT_ID])
 
 </div> -->
+
+### Setup Azure credentials
 
 Once you have your Azure account, open a terminal at the root of the project and run:
 
 ```bash
-.azure/setup.sh
+./setup.sh
 ```
 
 This script uses the [Azure CLI](https://learn.microsoft.com/cli/azure) and [GitHub CLI](https://cli.github.com/) to do the following:
@@ -880,363 +888,94 @@ This script uses the [Azure CLI](https://learn.microsoft.com/cli/azure) and [Git
 - Login into your GitHub account
 - Add the `AZURE_CREDENTIALS` secret to your GitHub repository, with your the service principal token
 
-Before reading further, let's run the script that will create all the Azure resources we'll need for this workshop, as it will take a few minutes to complete (we'll explain what it does a bit later):
+You're all set to deploy your application from GitHub.
 
-```bash
-.azure/infra.sh update
-```
+### Add CI/CD workflow
 
-### Introducing Azure services
-
-Let's look again at our application architecture diagram we saw earlier:
-
-![Application architecture](./assets/architecture.drawio.png)
-
-To run and monitor our application, we'll use various Azure services:
-
-| Service | Description |
-| ------- | ----------- |
-| [Azure Container Apps](https://learn.microsoft.com/azure/container-apps/) | A managed service to run containers in Azure, with built-in load balancing, auto-scaling, and more. |
-| [Azure Static Web Apps](https://learn.microsoft.com/azure/static-web-apps/) | A service to host websites, with built-in authentication, serverless API functions or proxy, Edge CDN and more. |
-| [Azure Cosmos DB](https://learn.microsoft.com/azure/cosmos-db/) | A NoSQL globally distributed database, that supports SQL, MongoDB, Cassandra, Gremlin, and Azure Table storage APIs. |
-| [Azure Container Registry](https://learn.microsoft.com/azure/container-registry/) | A container registry to store and manage container images. |
-| [Azure Log Analytics](https://learn.microsoft.com/azure/log-analytics/) | A service to collect and analyze logs from your Azure resources. |
-| [Azure Monitor](https://learn.microsoft.com/azure/azure-monitor/) | A service to monitor your Azure resources, with built-in dashboards, alerts, and more. |
-
-Azure Log Analytics doesn't appear in our diagram, but we'll use it to collect logs from our containers and use them to debug our application when needed. Azure Monitor isn't explicitly part of our infrastructure, but it's enabled across all Azure resources, and we'll use it to monitor our application and build a dashboard.
-
-#### About Azure Container Apps
-
-The primary service we'll use is [Azure Container Apps](https://learn.microsoft.com/azure/container-apps/overview), a fully managed serverless container service on Azure. It allows you to run containerized applications without worrying about orchestration or managing complex infrastructure such as Kubernetes.
-
-You write code using your preferred programming language or framework (in this workshop it's JavaScript and Node.js, but it can be anything), and build microservices with full support for [Distributed Application Runtime (Dapr)](https://dapr.io/). Then, your containers will scale dynamically based on HTTP traffic or events powered by [Kubernetes Event-Driven Autoscaling (KEDA)](https://keda.sh).
-
-There are already a few compute resources on Azure: from IAAS to FAAS.
-Azure Container Apps sits between PAAS and FAAS.
-On one hand, it feels more PaaS, because you are not forced into a specific programming model and you can control the rules on which to scale out / scale in.
-On the other hand, it has quite some serverless characteristics like scaling to zero, event-driven scaling, per second pricing and the ability to leverage Dapr's event-based bindings.
-
-![Diagram showing the different compute resources on Azure](./assets/azure-compute-services.png)
-
-Container Apps is built on top of [Azure Kubernetes Service](https://learn.microsoft.com/azure/aks/), including a deep integration with KEDA (event-driven auto scaling for Kubernetes), Dapr (distributed application runtime) and Envoy (a service proxy designed for cloud-native applications).
-The underlying complexity is completely abstracted for you.
-So, no need to configure your Kubernetes service, ingress, deployment, volume manifests... You get a very simple API and user interface to configure the desired configuration for your containerized application.
-This simplification means also less control, hence the difference with AKS.
-
-![Diagram showing the architecture of Azure Container Apps](./assets/azure-container-apps.png)
-
-Azure Container Apps has the following features:
-- *Revisions*: automatic versioning that helps to manage the application lifecycle of your container apps
-- *Traffic control*: split incoming HTTP traffic across multiple revisions for Blue/Green deployments and A/B testing
-- *Ingress*: simple HTTPS ingress configuration, without the need to worry about DNS and certificates
-- *Autoscaling*: leverage all KEDA-supported scale triggers to scale your app based on external metrics
-- *Secrets*: deploy secrets that are securely shared between containers, scale rules and Dapr sidecars
-- *Monitoring*: the standard output and error streams are automatically written to Log Analytics
-- *Dapr*: through a simple flag, you can enable native Dapr integration for your Container Apps
-
-Azure Container Apps introduces the following concepts:
-- *Environment*: this is a secure boundary around a group of Container Apps.
-They are deployed in the same virtual network, these apps can easily intercommunicate easily with each other and they write logs to the same Log Analytics workspace. An environment can be compared with a Kubernetes namespace.
-
-- *Container App*: this is a group of containers (pod) that is deployed and scale together. They share the same disk space and network.
-
-- *Revision*: this is an immutable snapshot of a Container App.
-New revisions are automatically created and are valuable for HTTP traffic redirection strategies, such as A/B testing.
-
-![Diagram showing the environment concept in Azure Container Apps](./assets/aca-environment.png)
-
-### Creating the infrastructure
-
-Now that we know what we'll be using, let's create the infrastructure we'll need for this workshop.
-
-You can use different ways to create Azure resources: the Azure CLI, the [Azure Portal](https://portal.azure.com), ARM templates, or even VS Code extensions or third party tools like Terraform.
-
-All these tools have one thing in common: they all use the [Azure Resource Manager (ARM) API](https://docs.microsoft.com/azure/azure-resource-manager/management/overview) to create and manage Azure resources. The Azure CLI is just a wrapper around the ARM API, and the Azure Portal is a web interface to the same API.
-
-![Diagram of how Azure Resource Manager interacts with different tools](./assets/azure-resource-manager.png)
-
-Any resource you create in Azure is part of a **resource group**. A resource group is a logical container that holds related resources for an Azure solution, just like a folder.
-
-When you ran the command `.azure/infra.sh update` earlier, it created a resource group name `rg-node-microservices-prod` with all the infrastructure for you, using Azure CLI and Infrastructure as Code (IaC) templates. We'll look at the details of the scripts later in this section.
-
-### Introducing Infrastructure as Code
-
-Infrastructure as Code (IaC) is a way to manage your infrastructure using the same tools and practices you use for your application code. In other words: you write code to describe the resources you need, and this code is committed to your project repository so you can use it to create, update, and delete your infrastructure as part of your CI/CD pipeline or locally.
-
-It's a great way to ensure consistency and repeatability of your infrastructure, and allows to manage the infrastructure of your project just like you manage the code of your project.
-
-There are many existing tools to manage your infrastructure as code, such as Terraform, Pulumi, or [Azure Resource Manager (ARM) templates](https://learn.microsoft.com/azure/azure-resource-manager/templates/overview). ARM templates are JSON files that allows you to define and configure Azure resources.
-
-In this workshop, we'll use [Bicep](https://learn.microsoft.com/azure/azure-resource-manager/bicep/overview?tabs=bicep), a new language that abtracts ARM templates creation while being more concise, readable and easier to use.
-
-#### What's Bicep?
-
-Bicep is a Domain Specific Language (DSL) for deploying Azure resources declaratively. It aims to drastically simplify the authoring experience with a cleaner syntax, improved type safety, and better support for modularity and code re-use. It's a transparent abstraction over ARM templates, which means anything that can be done in an ARM Template can be done in Bicep.
-
-Here's an example of a Bicep file that creates a Log Analytics workspace:
-
-```bicep
-resource logsWorkspace 'Microsoft.OperationalInsights/workspaces@2021-06-01' = {
-  name: 'my-awesome-logs'
-  location: 'westeurope'
-  tags: {
-    environment: 'production'
-  }
-  properties: {
-    retentionInDays: 30
-  }
-}
-```
-
-A resource is made of differents parts. First, you have the `resource` keyword, followed by a symbolic name of the resource that you can use to reference that resource in other parts of the template. Next to it is a string with the resource type you want to create and API version.
+Our code and repository are ready, so it's time to write the deployment workflow. We'll use [GitHub Actions](https://github.com/features/actions) to create a CI/CD workflow.
 
 <div class="info" data-title="note">
 
-> The API version is important, as it defines the version of the template used for a resource type. Different API versions can have different properties or options, and may introduce breaking changes. By specifying the API version, you ensure that your template will work regardless of the product updates, making your infrastructure more resilient over time.
+> CI/CD stands for *Continuous Integration and Continuous Deployment*.
+> Continuous Integration is a software development practice that requires developers to integrate their code into a shared repository several times a day. Each integration can then be verified by an automated build and automated tests. By doing so, you can detect errors quickly, and locate them more easily.
+> Continuous Deployment pushes this practice further, by preparing for a release to production after each successful build. By doing so, you can get working software into the hands of users faster.
 
 </div>
 
-Inside the resource, you then specify the name of the resource, its location, and its properties. You can also add tags to your resources, which are key/value pairs that you can use to categorize and filter your resources.
-
-Bicep templates can be split into multiple files, and you can use modules to reuse common parts of your infrastructure. You can also use parameters to make your templates more flexible and reusable.
-
-Have a look at the files inside the folder `./azure/infra` to see how we created the infrastructure for this workshop. The entry point is the `main.bicep` file, which is the main template that use the differents modules located in the `./azure/infra/modules` folder.
-
-Writing templates from scratch can be a bit tedious, but fortunately most of the time you don't have to:
-- You can reuse templates for the [Azure Quickstart collection](https://github.com/Azure/azure-quickstart-templates/tree/master/quickstarts)
-- The [Bicep VS Code extension](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-bicep) help you write your templates, providing snippets, syntax highlighting, auto-completion, and validation.
-- The [Bicep playground](https://aka.ms/bicepdemo) allows you to convert an ARM template to Bicep, and vice versa.
-
-### Details about the `infra.sh` script
-
-Because entering a bunch of commands one after the other in a terminal is not very fun, we made a Bash script to automate all the heavy lifting. This is the `.azure/infra.sh` script we ran earlier.
-
-This script is a wrapper around Azure CLI commands. The `update` command does the following:
-
-1. Run the command `az group create` to create a resource group if it doesn't exist yet.
-
-2. Run the command `az deployment group create` to create or update the resources in the resource group. This command takes a Bicep template as input, and creates or updates the resources defined in the template.
-
-3. Reformat the JSON deployment output from the previous command into the file `.<environment>.env`. You should see the file `.azure/.prod.env` that was created earlier.
-
-4. Run `az` commands specific to the resources created, to retrieve secrets like the connection string for database or the registry credentials, and store them in the `.env` file.
-
-If you're curious, you can have a look at the script to see how it works, and reuse it for your own projects.
-
----
-
-<div class="info" data-title="skip notice">
-
-> This step is entirely optional, you can skip it if you want to jump directly to the next section. In that case, your services won't persist the data and continue to use the in-memory storage, but you'll still be able to test and deploy the application.
-
-</div>
-
-
-## Adding CI/CD
-
-Our code and infrastructure are ready, so it's time to deploy our application. We'll use [GitHub Actions](https://github.com/features/actions) to create a CI/CD workflow.
-
-### What's CI/CD?
-
-CI/CD stands for *Continuous Integration and Continuous Deployment*.
-
-Continuous Integration is a software development practice that requires developers to integrate their code into a shared repository several times a day. Each integration can then be verified by an automated build and automated tests. By doing so, you can detect errors quickly, and locate them more easily.
-
-Continuous Deployment pushes this practice further, by preparing for a release to production after each successful build. By doing so, you can get working software into the hands of users faster.
-
-### What's GitHub Actions?
+#### What's GitHub Actions?
 
 GitHub Actions is a service that lets you automate your software development workflows. A workflow is a series of steps executed one after the other. You can use workflows to build, test and deploy your code, but you can also use them to automate other tasks, like sending a notification when an issue is created.
 
 It's a great way to automate your CI/CD pipelines, and it's free for public repositories.
 
-### Adding a deployment workflow
+#### Create workflow
 
 To set up GitHub Actions for deployment, we'll need to create a new workflow file in our repository.
 This file will contain the instructions for our CI/CD pipeline.
 
-Create a new file in your repository with the path `.github/workflows/deploy.yml` and the following content:
+Create a new file in your repository with the path `.github/workflows/deploy.yml` and add the following content:
 
 ```yml
-name: Azure deployment
+# This workflow for our node.js 18 app does the following:
+# - run tests
+# - build the app
+# - login to Azure with AZURE_CREDENTIALS github secret
+# - run Azure CLI command to deploy
+```
+
+After you hit `enter`, Copilot might be tempted to complete the comments, but that's not what we want to ignore it if that's the case by hitting `enter` again. It should not starts to complete the workflow, continue accepting suggestion until you end up with something like this:
+
+```yaml
+# This workflow for our node.js 18 app does the following:
+# - run tests
+# - build the app
+# - login to Azure with AZURE_CREDENTIALS github secret
+# - run Azure CLI command to deploy
+
+name: Deploy to Azure
+
 on:
   push:
     branches:
       - main
 
-concurrency:
-  group: deployment
-
 jobs:
-  build_and_deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout the project
-        uses: actions/checkout@v3
-
+      - uses: actions/checkout@v2
+      - name: Use Node.js 18
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18
+      - name: Install dependencies
+        run: npm ci
+      - name: Run tests
+        run: npm test
+      - name: Build
+        run: npm run build
       - name: Login to Azure
-        run: .azure/setup.sh --ci-login
-        env:
-          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Update infrastructure
-        run: .azure/infra.sh update
-
-      - name: Build project
-        run: .azure/build.sh
-
-      - name: Deploy project
-        run: .azure/deploy.sh
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Deploy to Azure
+        run: |
+          az webapp up -n ${{ secrets.AZURE_WEBAPP_NAME }} -g ${{ secrets.AZURE_RESOURCE_GROUP }} --sku F1
 ```
 
-Let's take some time to decompose this workflow file.
+Not bad! Copilot did a great job here, but we still need to change a few things to make it work.
 
-First, the `on` section defines when the workflow should be triggered. In this case, we want to trigger the workflow when a push is made to the `main` branch. You can trigger workflows on any event happening in your repository, like when an issue is created, or when a pull request is merged.
+In the last command in the bottom, we'll replace the web app name and the resource group. It's no secrets, so we can put in there directly.
 
-Then, the `concurrency` section defines how to handle multiple runs of the workflow, for example if multiple commits are pushed and the previous workflow hasn't finished yet. In this case, we'll simply wait for the previous workflow to finish before starting a new one by specifying a unique name. By default, workflows will run in parallel.
+- Replace `${{ secrets.AZURE_WEBAPP_NAME }}` with `"todo-copilot-${{github.actor}}"`. We're using `${{github.actor}}` to get your GitHub username, so we have a unique name for the web app.
 
-In the `jobs` section, we can define one or more jobs to execute. In this case, we only have one job, called `build_and_deploy`. We can specify the platform and operating system to use with the `runs-on` property, in our case we'll use a linux machine with the latest version of Ubuntu. Different platforms are available such as Windows or macOS, and CPU architectures as well like ARM. The default [runner images](https://github.com/actions/runner-images#available-images) provided by GitHub Actions already have many tools pre-installed and will be enough for our needs, but if you need to use a specific setup you can either use a container image or add additional installation steps for the tools you want to use.
+- Replace `${{ secrets.AZURE_RESOURCE_GROUP }}` with `"rg-copilot-nodejs-todo"`.
 
-Finally, we can define the steps to execute in the job. Each step is a separate action, and we can use the `uses` property to specify a pre-defined action from the [GitHub Marketplace](https://github.com/marketplace?type=actions), or the `run` property to execute a command in the container. In our case, we first checkout the project, then login to Azure, update our infrastructure then build and deploy the project.
-
-Notice that for the login step, we need to provide the `AZURE_CREDENTIALS` secret we created earlier. This secret is exposed to our script as an environment variable, using the `env` property.
-
-But wait, we didn't write the `build.sh` and `deploy.sh` scripts yet!
-
-### Writing the build script
-
-To build our application, we need to do two things:
-- Build the Docker image for our 3 microservices
-- Build our website
-
-Open the file `.azure/build.sh` and add the following content:
-
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
-cd "$(dirname "${BASH_SOURCE[0]}")/.."
-
-# Install dependencies
-npm ci
-
-# Build all Docker images
-npm run docker:build --if-present --workspaces
-
-# Build the website
-npm run build --workspace=website
-```
-
-The first line is a [shebang](https://en.wikipedia.org/wiki/Shebang_(Unix)) that tells the shell which program to use to execute the script, here the `bash` program.
-
-The next line `set -euo pipefail` sets [bash options](https://www.gnu.org/software/bash/manual/html_node/The-Set-Builtin.html) to exit if any command fails, or if an undefined variable is used. This is a good practice to avoid silent failures in your scripts.
-
-The following line `cd "$(dirname "${BASH_SOURCE[0]}")/.."` changes the current directory to the root of the project. The command `dirname "${BASH_SOURCE[0]}"` gets the folder name of the current script. This is useful to ensure the current working directory is always the root of the project, even if the script is executed from a different folder.
-
-After that, we install the dependencies and build our services and the website. Notice the `--workspaces` option that allows to run this script in every project of our workspace. We also used the `--if-present` option to skip the command if the script doesn't exist, like for the `website` project.
-
-### Writing the deploy script
-
-Next, we'll write the script to deploy our application. Open the file `.azure/deploy.sh` and add the following content:
-
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
-cd "$(dirname "${BASH_SOURCE[0]}")"
-source .prod.env
-cd ..
-
-# Get current commit SHA
-commit_sha="$(git rev-parse HEAD)"
-
-# Allow silent installation of Azure CLI extensions
-az config set extension.use_dynamic_install=yes_without_prompt
-
-echo "Logging into Docker..."
-echo "$REGISTRY_PASSWORD" | docker login \
-  --username "$REGISTRY_USERNAME" \
-  --password-stdin \
-  "$REGISTRY_NAME.azurecr.io"
-```
-
-The first part of the script is similar to the build script, we set the bash options and change the current directory, but in addition we source the variables and secrets from the `.prod.env` file so that we can use them in the script.
-
-After that we prepare a few things:
-- We get the current commit [SHA](https://en.wikipedia.org/wiki/Secure_Hash_Algorithms), so we can use it to tag our Docker images
-- We configure the Azure CLI to allow the silent installation of Azure CLI extensions, like the `containerapp` extension we'll use later
-
-Then we configure Docker to log into our private registry, so we can push our Docker images to it.
-
-Now let's add below the commands to deploy our services:
-
-```bash
-echo "Deploying settings-api..."
-docker image tag settings-api "$REGISTRY_NAME.azurecr.io/settings-api:$commit_sha"
-docker image push "$REGISTRY_SERVER/settings-api:$commit_sha"
-
-az containerapp update \
-  --name "${CONTAINER_APP_NAMES[0]}" \
-  --resource-group "$RESOURCE_GROUP_NAME" \
-  --image "$REGISTRY_SERVER/settings-api:$commit_sha" \
-  --set-env-vars \
-    DATABASE_CONNECTION_STRING="$DATABASE_CONNECTION_STRING" \
-  --query "properties.configuration.ingress.fqdn" \
-  --output tsv
-
-echo "Deploying dice-api..."
-docker image tag dice-api "$REGISTRY_NAME.azurecr.io/dice-api:$commit_sha"
-docker image push "$REGISTRY_SERVER/dice-api:$commit_sha"
-
-az containerapp update \
-  --name "${CONTAINER_APP_NAMES[1]}" \
-  --resource-group "$RESOURCE_GROUP_NAME" \
-  --image "$REGISTRY_SERVER/dice-api:$commit_sha" \
-  --set-env-vars \
-    DATABASE_CONNECTION_STRING="$DATABASE_CONNECTION_STRING" \
-  --query "properties.configuration.ingress.fqdn" \
-  --output tsv
-
-echo "Deploying gateway-api..."
-docker image tag gateway-api "$REGISTRY_NAME.azurecr.io/gateway-api:$commit_sha"
-docker image push "$REGISTRY_SERVER/gateway-api:$commit_sha"
-
-az containerapp update \
-  --name "${CONTAINER_APP_NAMES[2]}" \
-  --resource-group "$RESOURCE_GROUP_NAME" \
-  --image "$REGISTRY_SERVER/gateway-api:$commit_sha" \
-  --set-env-vars \
-    SETTINGS_API_URL="https://${CONTAINER_APP_HOSTNAMES[0]}" \
-    DICE_API_URL="https://${CONTAINER_APP_HOSTNAMES[1]}" \
-  --query "properties.configuration.ingress.fqdn" \
-  --output tsv
-```
-
-We'll do the same thing for our 3 services:
-1. We tag the Docker image with the current commit SHA, and push it to our registry
-2. We use the Azure CLI to update the container app with the new image, and set the environment variables for each service. For the settings and dice APIs, we set the database connection string, and for the gateway API we set the URLs of the other services.
-
-<div class="tip" data-title="tip">
-
-> The Azure CLI `--query` option allows to get a specific value from JSON response using [JMESPath syntax](https://jmespath.org/), while `--output tsv` sets the output format to a string. Here we use it to get the hostname of the container apps, as it might be helpful to debug the deployment if someone looks at the logs.
-
-</div>
-
-Let's continue with adding the command to deploy our website:
-
-```bash
-echo "Deploying website..."
-cd packages/website
-npx swa deploy \
-  --app-name "${STATIC_WEB_APP_NAMES[0]}" \
-  --deployment-token "${STATIC_WEB_APP_DEPLOYMENT_TOKENS[0]}" \
-  --env "production" \
-  --verbose
-```
-
-We use the Static Web Apps CLI this time deploy our website. Because it's installed locally in the `website` project, we need to invoke it with `npx`.
+And with these changes, we're done.
 
 ### Deploying the application
 
-The workflow and scripts are complete, so it's time let the CI/CD pipeline do its job.
+The workflow is now complete, so it's time to test it and see if it's working as intended.
 
 Commit all the changes you made to the repository, and push them, using either VS Code or the command line:
 
@@ -1254,25 +993,32 @@ gh repo view -w
 
 Select the **Actions** tab, and you should see the workflow running. It will take a few minutes to complete, but you can follow the progress in the logs by clicking on the running workflow.
 
+TODO
 ![Screenshot showing GitHub Actions workflow running](./assets/gh-actions.png)
 
 Then select the job name **build_and_deploy** on the left, and you should see the logs of the workflow.
 
+TODO
 ![Screenshot showing GitHub Actions workflow logs](./assets/gh-workflow-details.png)
 
 When the workflow is complete, you should see a green checkmark.
 
+
 ### Testing the application
 
-After your deployment is complete, you can finally test the application by opening the URL of the Static Web App in a browser. You can find the URL in the workflow logs, or using these commands:
+After your deployment is complete, you can finally test the application by opening the URL of the Web App in a browser. You can find the URL in the workflow logs, or using these commands:
 
 ```bash
-source .azure/.prod.env 
-open "https://$STATIC_WEB_APP_HOSTNAMES"
+az webapp show \
+  --name "todo-copilot-<YOUR_GITHUB_USERNAME>" \
+  --resource-group "rg-copilot-nodejs-todo" \
+  --query "defaultHostName" \
+  --output tsv
 ```
 
-You should then see the website. Log in with your GitHub account, and you should be able to roll some dice!
+Open the URL returned by the command, and you should then see the website.
 
+TODO
 ![Screenshot showing the deployed website](./assets/app-deployed.png)
 
 ---
@@ -1300,13 +1046,7 @@ We hope you enjoyed following along, learned something new and more importantly,
 To delete the Azure resources, you can run this command:
 
 ```bash
-.azure/infra.sh delete
-```
-
-Or directly use the Azure CLI:
-
-```bash
-az group delete --name rg-copilot-nodejs-todo-prod
+az group delete --name rg-copilot-nodejs-todo
 ```
 
 ### References
