@@ -1,29 +1,35 @@
-# name: Deploy to Azure
-# on:
-#   push:
-#     branches:
-#       - main
+# This workflow for our node.js 18 app does the following:
+# - run tests
+# - build the app
+# - login to Azure with AZURE_CREDENTIALS github secret
+# - run Azure CLI command to deploy
 
-# concurrency:
-#   group: deployment
+name: Deploy to Azure
 
-# jobs:
-#   build_and_deploy:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout the project
-#         uses: actions/checkout@v3
+on:
+  push:
+    branches:
+      - main
 
-#       - name: Login to Azure
-#         run: .azure/setup.sh --ci-login
-#         env:
-#           AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-
-#       - name: Update infrastructure
-#         run: .azure/infra.sh update
-
-#       - name: Build project
-#         run: .azure/build.sh
-
-#       - name: Deploy project
-#         run: .azure/deploy.sh
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js 18
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18
+      - name: Install dependencies
+        run: npm ci
+      - name: Run tests
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Deploy to Azure
+        run: |
+          az webapp up -n "copilot-${{github.actor}}" -g "rg-copilot-nodejs-todo" --sku F1 --runtime "NODE|18-lts"
