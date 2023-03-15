@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ##############################################################################
-# Usage: ./setup.sh <project_name> [environment_name] [location] [options]
+# Usage: ./setup.sh <project_name>
 # Setup the current GitHub repo for deploying on Azure.
 ##############################################################################
 # v1.1.3 | dependencies: Azure CLI, GitHub CLI, jq
@@ -8,13 +8,10 @@
 
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
-if [[ -f ".settings" ]]; then
-  source .settings
-fi
 
 showUsage() {
   script_name="$(basename "$0")"
-  echo "Usage: ./$script_name <project_name>"
+  echo "Usage: ./$script_name [project_name]"
   echo "Setup the current GitHub repo for deploying on Azure."
   echo
   echo "Options:"
@@ -67,11 +64,9 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Restore positional args
-set -- "${args[@]}"
+set -- "${args[@]:-}"
 
-project_name="${1:-$project_name}"
-environment="${2:-$environment}"
-location="${3:-$location}"
+project_name="${1:-copilot-nodejs-todo}"
 
 if ! command -v az &> /dev/null; then
   echo "Azure CLI not found."
@@ -158,7 +153,7 @@ fi
 
 if [[ "$terminate" == true ]]; then
   echo "Deleting current setup..."
-  .azure/infra.sh down "$project_name" "$environment" "$location"
+  az group delete --name "rg-$project_name"
   echo "Retrieving GitHub repository URL..."
   remote_repo=$(git config --get remote.origin.url)
   gh secret delete AZURE_CREDENTIALS -R "$remote_repo"
@@ -184,11 +179,6 @@ else
   remote_repo=$(git config --get remote.origin.url)
   echo "Setting up GitHub repository secrets..."
   gh secret set AZURE_CREDENTIALS -b"$service_principal" -R "$remote_repo"
-
-  if [[ -f ".github/workflows/deploy.yml" ]]; then
-    echo "Found deploy.yml workflow, triggering deployment..."
-    gh workflow run deploy.yml
-  fi
 
   echo "Setup success!"
 fi
