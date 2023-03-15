@@ -78,7 +78,7 @@ router.get('/tasks/:taskId', async function(req, res) {
   }
 });
 
-router.put('/tasks/:taskId', async function(req, res) {
+router.patch('/tasks/:taskId', async function(req, res) {
   try {
     const { taskId } = req.params;
     

@@ -5,7 +5,7 @@ const userId = localStorage.getItem('userId');
 if (!userId) {
   localStorage.setItem('userId', Math.random().toString(36).substring(2));
 }
-const apiUrl = `${environment.api}/users/${userId}`;
+const apiUrl = `${environment.api}`;
 
 let tasks: Task[] | undefined;
 
@@ -17,7 +17,7 @@ export enum TaskFilter {
 
 export async function getTasks(filter: TaskFilter = TaskFilter.All): Promise<Task[]> {
   if (tasks === undefined) {
-    const response = await fetch(`${apiUrl}/tasks/`);
+    const response = await fetch(`${apiUrl}/users/${userId}/tasks/`);
     tasks = await response.json() as Task[];
   }
 
@@ -32,7 +32,7 @@ export async function getTasks(filter: TaskFilter = TaskFilter.All): Promise<Tas
 }
 
 export async function addTask(description: string) {
-  const response = await fetch(`${apiUrl}/tasks/`, {
+  const response = await fetch(`${apiUrl}/users/${userId}/tasks/`, {
     method: 'POST',
     body: JSON.stringify({ description })
   });
