@@ -7,7 +7,7 @@
     "dev": "concurrently npm:dev:* --kill-others",
     "dev:server": "npm start --workspace=server",
     "dev:client": "npm start --workspace=client",
-    "start": "npm run start:prod --workspace=server",
+    "start": "node packages/server/lib/server.js",
     "test": "npm test --workspace=server",
     "build": "npm run build --workspaces"
   },
