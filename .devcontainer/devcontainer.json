@@ -15,7 +15,7 @@
 	"forwardPorts": [3000, 4444],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "npm i -g npm@latest pino-pretty fuzz-run @moaw/cli && npm install",
+	"postCreateCommand": "npm i -g npm@latest fuzz-run @moaw/cli && npm install",
 
 	// Configure tool-specific properties.
 	"customizations": {
