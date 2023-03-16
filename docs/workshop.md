@@ -5,7 +5,7 @@ type: workshop
 authors: Yohan Lasorsa
 contacts: '@sinedied'
 banner_url: assets/copilot-banner.jpg
-duration_minutes: 20
+duration_minutes: 30
 audience: students, devs
 level: intermediate
 tags: github copilot, node.js, azure, express, javascript, typescript, app service, cosmos db, github actions, github codespaces
