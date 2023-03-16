@@ -15,13 +15,14 @@
 	"forwardPorts": [3000, 4444],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "npm i -g npm@latest fuzz-run @moaw/cli && npm install",
+	"postCreateCommand": "npm i -g npm@latest fuzz-run @moaw/cli && npm ci",
 
 	// Configure tool-specific properties.
 	"customizations": {
 		"vscode": {
 			"extensions": [
 				"GitHub.copilot",
+				"GitHub.copilot-labs",
 				"humao.rest-client",
 				"ms-azuretools.vscode-bicep",
 				"ms-azuretools.vscode-cosmosdb",
