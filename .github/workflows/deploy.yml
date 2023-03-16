@@ -32,4 +32,13 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: Deploy to Azure
         run: |
-          az webapp up -n "copilot-${{github.actor}}" -g "rg-copilot-nodejs-todo" --sku F1 --runtime "NODE|18-lts"
+          # Create resource group rg-copilot-nodejs-todo
+          az group create --name rg-copilot-nodejs-todo --location eastus
+          # Create cosmosdb with default api
+          az cosmosdb create --name copilot-nodejs-todo --resource-group rg-copilot-nodejs-todo
+          # Deploy webapp using node 18
+          az webapp up --sku F1 --name nodejs-todo-sinedied --resource-group rg-copilot-nodejs-todo --runtime "node|18-lts"
+          # Retrieve cosmosdb connection string
+          DATABASE_CONNECTION_STRING=$(az cosmosdb keys list --name copilot-nodejs-todo --resource-group rg-copilot-nodejs-todo --type connection-strings --query "connectionStrings[0].connectionString" -o tsv)
+          # Set connection string in webapp
+          az webapp config appsettings set --name nodejs-todo-sinedied --resource-group rg-copilot-nodejs-todo --settings DATABASE_CONNECTION_STRING=$DATABASE_CONNECTION_STRING
