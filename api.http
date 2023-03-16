@@ -20,7 +20,7 @@ content-type: application/json
 GET {{api_host}}/api/tasks/{{task_id}}
 
 ### Update task
-PUT {{api_host}}/api/tasks/{{task_id}}
+PATCH {{api_host}}/api/tasks/{{task_id}}
 content-type: application/json
 
 { "completed": true }
