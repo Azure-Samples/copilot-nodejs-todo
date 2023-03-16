@@ -1093,7 +1093,7 @@ After your deployment is complete, you can finally test the application by openi
 
 ```bash
 az webapp show \
-  --name "nodejs-todo-<YOUR_GITHUB_USERNAME>" \
+  --name "nodejs-todo-YOUR_GITHUB_USERNAME" \
   --resource-group "rg-copilot-nodejs-todo" \
   --query "defaultHostName" \
   --output tsv
