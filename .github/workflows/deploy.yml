@@ -37,8 +37,8 @@ jobs:
           # Create cosmosdb with default api
           az cosmosdb create --name copilot-nodejs-todo --resource-group rg-copilot-nodejs-todo
           # Create database todos with collection tasks
-          az cosmosdb sql database create --account-name copilot-nodejs-todo --resource-group rg-copilot-nodejs-todo --db-name todos
-          az cosmosdb sql container create --account-name copilot-nodejs-todo --resource-group rg-copilot-nodejs-todo --db-name todos --collection-name tasks --partition-key-path /id --throughput 400
+          az cosmosdb sql database create --account-name copilot-nodejs-todo --resource-group rg-copilot-nodejs-todo --name todos
+          az cosmosdb sql container create --account-name copilot-nodejs-todo --resource-group rg-copilot-nodejs-todo --name todos --collection-name tasks --partition-key-path /id --throughput 400
           # Deploy webapp using node 18
           az webapp up --sku F1 --name nodejs-todo-sinedied --resource-group rg-copilot-nodejs-todo --runtime "node|18-lts"
           # Retrieve cosmos endpoint
