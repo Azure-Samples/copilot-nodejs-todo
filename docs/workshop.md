@@ -1091,7 +1091,7 @@ After your deployment is complete, you can finally test the application by openi
 
 ```bash
 az webapp show \
-  --name "todo-copilot-<YOUR_GITHUB_USERNAME>" \
+  --name "nodejs-todo-<YOUR_GITHUB_USERNAME>" \
   --resource-group "rg-copilot-nodejs-todo" \
   --query "defaultHostName" \
   --output tsv
@@ -1129,7 +1129,7 @@ If you missed any of the steps or would like to check your final code, you can r
 To delete the Azure resources, you can run this command:
 
 ```bash
-az group delete --name rg-copilot-nodejs-todo
+az group delete --name rg-copilot-nodejs-todo --yes --no-wait
 ```
 
 ### References
