@@ -1,9 +1,10 @@
 import { Task } from './task';
 import { environment } from '../environments/environment';
 
-const userId = localStorage.getItem('userId');
+let userId = localStorage.getItem('userId');
 if (!userId) {
-  localStorage.setItem('userId', Math.random().toString(36).substring(2));
+  userId = Math.random().toString(36).substring(2);
+  localStorage.setItem('userId', userId);
 }
 const apiUrl = `${environment.api}`;
 
