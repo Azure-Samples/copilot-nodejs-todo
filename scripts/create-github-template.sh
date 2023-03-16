@@ -42,7 +42,7 @@ router.get('/users/:userId/tasks', async function(req, res) {
     // TODO: get tasks from database
     const tasks: Task[] = [];
 
-    res.json({ tasks });
+    res.json(tasks);
   } catch (error: any) {
     res.status(500).json({ error: error?.message || 'Internal server error' });
   }

@@ -14,7 +14,7 @@ router.get('/users/:userId/tasks', async function(req, res) {
 
     const tasks: Task[] = await DbService.getInstance().getTasks(userId);
 
-    res.json({ tasks });
+    res.json(tasks);
   } catch (error: any) {
     res.status(500).json({ error: error?.message || 'Internal server error' });
   }
