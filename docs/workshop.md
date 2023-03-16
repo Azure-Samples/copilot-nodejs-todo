@@ -982,6 +982,28 @@ az cosmosdb create --name copilot-nodejs-todo --resource-group rg-copilot-nodejs
 Great! Accept it, and continue with this comment:
 
 ```bash
+# Create database todos with collection tasks
+```
+
+Copilot should suggest something like these two lines:
+
+```bash
+az cosmosdb sql database create --name copilot-nodejs-todo --resource-group rg-copilot-nodejs-todo --db-name todos
+az cosmosdb sql container create --name copilot-nodejs-todo --resource-group rg-copilot-nodejs-todo --db-name todos --collection-name tasks --partition-key-path /id --throughput 400
+```
+
+Unfortunately, while looking like something that could work, it's not as the option names are incorrect. Maybe it's a sign that the `az cosmosdb` command-line could be improved to be more intuitive, but anyway, let's fix it. Change these two lines to:
+
+```bash
+az cosmosdb sql database create --account-name copilot-nodejs-todo --resource-group rg-copilot-nodejs-todo --name todos
+az cosmosdb sql container create --account-name copilot-nodejs-todo --resource-group rg-copilot-nodejs-todo --database-name todos --name tasks --partition-key-path /id --throughput 400
+```
+
+As you can see, it's very subtle and the `--name` option have different meanings here, that's probably what caugh Copilot off guard. It's a great reminder that you should always check what it suggests you, as sometimes it can be off a bit. That's why you're pair programming with it, right?
+
+Let's continue by adding this comment:
+
+```bash
 # Deploy webapp using node 18
 ```
 
