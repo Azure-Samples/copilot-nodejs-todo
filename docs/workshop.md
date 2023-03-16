@@ -62,9 +62,9 @@ To sign up, go to [GitHub Copilot Labs](https://githubnext.com/projects/copilot-
 
 ### Create the project
 
-Open [this GitHub repository](https://github.com/azure-samples/copilot-nodejs-todo-template), select the **Fork** button and click on **Create fork** to create a copy of the project in your own GitHub account.
+Open [this GitHub repository](https://github.com/Azure-Samples/copilot-nodejs-todo-template), select the **Fork** button and click on **Create fork** to create a copy of the project in your own GitHub account.
 
-![Screenshot of GitHub showing the Fork button](./assets/fork-project.png) TODO
+![Screenshot of GitHub showing the Fork button](./assets/fork-project.png)
 
 Once the fork is created, select the **Code** button, then the **Codespaces** tab and click on **Create Codespaces on main**.
 
@@ -94,7 +94,7 @@ After that you need to clone the project on your machine:
 
 1. Select the **Code** button, then the **Local** tab and copy your repository url.
 
-![Screenshot of GitHub showing the repository URL](./assets/github-clone.png) TODO
+![Screenshot of GitHub showing the repository URL](./assets/github-clone.png)
 
 2. Open a terminal and run:
 
@@ -122,7 +122,6 @@ If you want to work locally without using a dev container, you need to clone the
 | Node.js v18+  | [Get Node.js](https://nodejs.org) |
 | Azure CLI     | [Get Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli#install) |
 | GitHub CLI    | [Get GitHub CLI](https://cli.github.com/manual/installation) |
-| pino-pretty log formatter | [Get pino-pretty](https://github.com/pinojs/pino-pretty#install) |
 | Bash v3+      | [Get bash](https://www.gnu.org/software/bash/) (Windows users can use **Git bash** that comes with Git) |
 | jq            | [Get jq](https://stedolan.github.io/jq/download) |
 | A code editor | [Get VS Code](https://aka.ms/get-vscode) |
@@ -166,11 +165,13 @@ Otherwise, you can use your regular `npm` commands in any project folder and it 
 
 Our Todo application is *almost* complete. We need to add a database to store the tasks, and we'll use [Azure Cosmos DB](https://azure.microsoft.com/services/cosmos-db/) to do that, with the assistance of GitHub Copilot.
 
-### About Azure Cosmos DB
+<div class="info" data-title="About Azure Cosmos DB">
 
-Azure Cosmos DB is a fully managed NoSQL database service that offers multiple APIs, including SQL, MongoDB, Cassandra, Gremlin, and Azure Table storage. It's a globally distributed database, which means that your data can be replicated across multiple regions, and you can choose the closest region to your users to reduce latency. For our needs, we'll be using the SQL API along with the Node.js SDK. 
+>Azure Cosmos DB is a fully managed NoSQL database service that offers multiple APIs, including SQL, MongoDB, Cassandra, Gremlin, and Azure Table storage. It's a globally distributed database, which means that your data can be replicated across multiple regions, and you can choose the closest region to your users to reduce latency. For our needs, we'll be using the SQL API along with the Node.js SDK. 
+>
+>Surely, that may sound a bit strange, using SQL to access a NoSQL database? But don't worry, it's not a mistake. Cosmos DB is a *multi-model database*, which means that it can support different ways of accessing the data. SQL is the most common way of querying data, so it feels familiar to most developers and makes it easy to get started. Still, you must not forget that it's not relational database, so you can't make very complex queries and joins have to be avoided because of their performance impact.
 
-Surely, that may sound a bit strange, using SQL to access a NoSQL database? But don't worry, it's not a mistake. Cosmos DB is a *multi-model database*, which means that it can support different ways of accessing the data. SQL is the most common way of querying data, so it feels familiar to most developers and makes it easy to get started. Still, you must not forget that it's not relational database, so you can't make very complex queries and joins have to be avoided because of their performance impact.
+</div>
 
 ### Create the database service
 
@@ -187,7 +188,7 @@ Once it's installed the package, create a new folder `packages/server/src/servic
 // Import Cosmos SDK and task model
 ```
 
-As soon as you finish typing and hit enter, Copilot will suggest the import for you:
+As soon as you finish typing and hit enter, Copilot will suggest the first import for you:
 
 ![Screenshot of VS Code showing Copilot suggesting the import](./assets/copilot-import.png)
 
@@ -324,8 +325,7 @@ if (!process.env.COSMOS_KEY) {
 
 Now look at the different methods Copilot generated for us. While it all looks correct, we would like to change the `getTasks()` method so that it only returns the tasks for a specified user ID.
 
-To do that, replace the `// Get all tasks` comment above the function with `// Get all tasks for a user`.
-Delete the `getTasks()` method entirely, and let Copilot generate it again for us. It will suggest new code line by line, accept the suggestions as they come until the function is complete.
+To do that, delete the `getTasks()` function entirely and replace it with the comment `// Get all tasks for a user`. Then let Copilot generate it again for us. It will suggest new code line by line, accept the suggestions as they come until the function is complete.
 
 <details>
 <summary>Example Copilot suggestion</summary>
@@ -1101,7 +1101,6 @@ az webapp show \
 
 Open the URL returned by the command, and you should then see the website.
 
-TODO
 ![Screenshot showing the deployed website](./assets/app-deployed.png)
 
 ---
