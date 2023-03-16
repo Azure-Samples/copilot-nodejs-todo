@@ -1,24 +1,16 @@
 - [x] setup jest
 - [x] clean up extra images
-- [ ] update api.http
-- [ ] create template repo
-- [ ] update missing images
+- [x] update api.http
+- [x] create template repo
+- [x] banner
+- [x] create CosmosDB and set env in app service
+- [ ] fix API
 
+- [ ] workshop run through
+- [ ] update missing images
+- [ ] email 
+
+- [ ] check test locally
 - [ ] script and video of the workshop
 
-## TODO
 
-
-6.	Deploy on Azure
-Step 6: Use Copilot to complete the GitHub Actions file and add action to deploy our app on Azure App Service
-
-### Azure Setup
-
-### Setup CI/CD using GitHub Actions
-- test
-- build/deploy
-  - Azure/Login
-  - Azure CLI create resource group && Azure CLI create app service plan && Azure CLI create web app
-  - App Service deploy
-
-7.	Step 7: Deploy and view the site with the working data connection.
