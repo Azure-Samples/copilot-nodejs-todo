@@ -41,8 +41,8 @@ export class TaskAddComponent {
 
   addTask(event: Event) {
     const input = event.target as HTMLInputElement;
-    const description = input.value;
+    const title = input.value;
     input.value = '';
-    this.added.emit(description);
+    this.added.emit(title);
   }
 }

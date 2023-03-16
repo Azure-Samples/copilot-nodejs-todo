@@ -32,10 +32,10 @@ export async function getTasks(filter: TaskFilter = TaskFilter.All): Promise<Tas
   }
 }
 
-export async function addTask(description: string) {
+export async function addTask(title: string) {
   const response = await fetch(`${apiUrl}/users/${userId}/tasks/`, {
     method: 'POST',
-    body: JSON.stringify({ description })
+    body: JSON.stringify({ title })
   });
   const task = await response.json() as Task;
   tasks?.push(task);
