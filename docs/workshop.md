@@ -4,7 +4,7 @@ description: Discover how to use GitHub Copilot to quickly build a Node.js appli
 type: workshop
 authors: Yohan Lasorsa
 contacts: '@sinedied'
-banner_url: assets/copilot-banner.jpg_TODO
+banner_url: assets/copilot-banner.jpg
 duration_minutes: 20
 audience: students, devs
 level: intermediate
@@ -159,18 +159,6 @@ As we'll be using Node.js to build our API and website, we've setup a [NPM works
 For example, you can run `npm run <script_name> --workspaces` in the root of the project to run a script in all the projects, or `npm run <script_name> --workspace=packages/server` to run a script for a specific project. 
 
 Otherwise, you can use your regular `npm` commands in any project folder and it will work as usual.
-
-<!-- ### About the codebase
-
-We generated the base code of our differents services with the respective CLI or generator of the frameworks we'll be using, with very few modifications made so we can start working quickly on the most important parts of the workshop.
-
-The only changes we made to the generated code is to remove the files we don't need, configure the ports for each API, and setup [pino-http](https://github.com/pinojs/pino-http) as the logger to have a consistent logging format across all the services.
-
-<div class="info" data-title="note">
-
-> If you want to see how the services were generated and the details of the changes we made, you can look at [this script](https://github.com/Azure-Samples/nodejs-microservices/blob/main/scripts/create-projects.sh) we used to generate the projects.
-
-</div> -->
 
 ---
 
@@ -1049,7 +1037,7 @@ The workflow will run automatically, so we can look at its progress directly on 
 gh repo view -w
 ```
 
-Select the **Actions** tab, and you should see the workflow running. It will take a few minutes to complete, but you can follow the progress in the logs by clicking on the running workflow.
+Select the **Actions** tab, and you should see the workflow running. It will take a few minutes to complete so you can grab a cup of coffee ☕. You can follow the progress in the logs by clicking on the running workflow.
 
 TODO
 ![Screenshot showing GitHub Actions workflow running](./assets/gh-actions.png)
@@ -1086,6 +1074,8 @@ TODO
 That's it, the end of the workshop. As advertised, we *did* pair program with Copilot, but let's be honest, sometimes we felt more as the assitant as Copilot did most of the hard work for use. Like in any pair programming session, we still had to check what Copilot was doing, and guide it to the right direction. But overall, in a matter of minutes we were able to complete and deploy our application with minimal effort.
 
 We hope you enjoyed following along, learned something new and more importantly, that you'll be able to take this experience back to your projects.
+
+If you missed any of the steps or would like to check your final code, you can run this command in the terminal to get the completed solution (be sure to commit your code first!): `curl -fsSL https://github.com/Azure-Samples/copilot-nodejs-todo/releases/download/latest/solution.tar.gz | tar -xvz`
 
 <div class="warning" data-title="had issues?">
 
