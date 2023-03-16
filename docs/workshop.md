@@ -953,6 +953,8 @@ jobs:
 
 Not bad! Copilot did a great job here, but we still need to change a few things to make it work.
 
+#### Update deployment commands
+
 The last command is not enough to deploy our app, since we also need to create a Cosmos DB database and set the connection string.
 
 Remove the command entirely, and let's go step by step to ask Copilot what we need. Add this first comment:
@@ -989,7 +991,7 @@ Copilot should suggest something like these two lines:
 
 ```bash
 az cosmosdb sql database create --name copilot-nodejs-todo --resource-group rg-copilot-nodejs-todo --db-name todos
-az cosmosdb sql container create --name copilot-nodejs-todo --resource-group rg-copilot-nodejs-todo --db-name todos --collection-name tasks --partition-key-path /id --throughput 400
+az cosmosdb sql container create --name copilot-nodejs-todo --resource-group rg-copilot-nodejs-todo --db-name todos --collection-name tasks --partition-key-path /_partitionKey --throughput 400
 ```
 
 Unfortunately, while looking like something that could work, it's not as the option names are incorrect. Maybe it's a sign that the `az cosmosdb` command-line could be improved to be more intuitive, but anyway, let's fix it. Change these two lines to:
