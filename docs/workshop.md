@@ -852,7 +852,7 @@ That wasn't much work, right?
 It's now time to test our API! First we need to start the server. Run the following command in the terminal:
 
 ```bash
-npm run start:server
+npm run dev:server
 ``` -->
 
 ---
@@ -965,13 +965,71 @@ jobs:
 
 Not bad! Copilot did a great job here, but we still need to change a few things to make it work.
 
-In the last command in the bottom, we'll replace the web app name and the resource group. It's no secrets, so we can put in there directly.
+The last command is not enough to deploy our app, since we also need to create a Cosmos DB database and set the connection string.
 
-- Replace `${{ secrets.AZURE_WEBAPP_NAME }}` with `"todo-copilot-${{github.actor}}"`. We're using `${{github.actor}}` to get your GitHub username, so we have a unique name for the web app.
+Remove the command entirely, and let's go step by step to ask Copilot what we need. Add this first comment:
 
-- Replace `${{ secrets.AZURE_RESOURCE_GROUP }}` with `"rg-copilot-nodejs-todo"`.
+```bash
+# Create resource group rg-copilot-nodejs-todo
+```
 
-And with these changes, we're done.
+Hit `enter`, and Copilot should suggest this command for you:
+
+```bash
+az group create --name rg-copilot-nodejs-todo --location eastus
+```
+
+Accept it, then now add this comment to create the database:
+
+```bash
+# Create cosmosdb with default api
+```
+
+Copilot should come up with something like this:
+
+```bash
+az cosmosdb create --name copilot-nodejs-todo --resource-group rg-copilot-nodejs-todo
+```
+
+Great! Accept it, and continue with this comment:
+
+```bash
+# Deploy webapp using node 18
+```
+
+Now it you suggest a command similar than what it did in the first place:
+
+```bash
+az webapp up --sku F1 --name copilot-nodejs-todo --resource-group rg-copilot-nodejs-todo --runtime "node|18-lts"
+```
+
+Again, accept it, but we'll need to tweak the `--name` option a bit to make it unique, as it will also serve as the URL for your web app. Change it to something like `--name nodejs-todo-YOUR_GITHUB_USERNAME`.
+
+And now we need to retrieve the connection string. Add this comment:
+
+```bash
+# Retrieve cosmosdb connection string
+```
+
+And start typing `DATABASE_CONNECTION_STRING=` so it know that we want to get the result inside this variable. Copilot should complete the line with:
+
+```bash
+DATABASE_CONNECTION_STRING=$(az cosmosdb keys list --name copilot-nodejs-todo --resource-group rg-copilot-nodejs-todo --type connection-strings --query "connectionStrings[0].connectionString" -o tsv)
+```
+
+Almost there! Finally, we need set the environment variable in the web app. Add this comment:
+
+```bash
+# Set connection string in webapp
+```
+
+And Copilot should suggest a command like this:
+
+```bash
+az webapp config appsettings set --name nodejs-todo-YOUR_GITHUB_USERNAME --resource-group rg-copilot-nodejs-todo --settings DATABASE_CONNECTION_STRING=$DATABASE_CONNECTION_STRING
+```
+
+All good! Now we should be set and ready to deploy.
 
 ### Deploying the application
 
