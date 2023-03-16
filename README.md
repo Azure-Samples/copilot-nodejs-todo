@@ -25,15 +25,6 @@ packages/         # The different parts of our app
 package.json      # NPM workspace configuration
 ```
 
-## How to run locally
-
-```bash
-npm install
-npm run dev
-```
-
-The application will then be available at http://localhost:4200.
-
 ## How to build the project
 
 ```bash
@@ -49,6 +40,17 @@ This command will build the client and server packages.
 ```
 
 This command will ask you to log in into Azure and GitHub, then set up the `AZURE_CREDENTIALS` repository secrets for deployment.
+
+## How to run locally
+
+```bash
+npm install
+npm run dev
+```
+
+The application will then be available at http://localhost:4200.
+
+> **Important note**: you need to set the environment variable `DATABASE_CONNECTION_STRING` to a valid [Azure Cosmos DB](https://azure.microsoft.com/products/cosmos-db?WT.mc_id=javascript-0000-yolasors) connection string. You can use the [Try Cosmos](https://cosmos.azure.com/try/) website to get one for testing without the need to deploy one yourself (choose *Azure Cosmos DB for NoSQL*).
 
 ## Contributing
 
