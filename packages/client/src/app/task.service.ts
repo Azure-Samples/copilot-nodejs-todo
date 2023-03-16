@@ -35,7 +35,8 @@ export async function getTasks(filter: TaskFilter = TaskFilter.All): Promise<Tas
 export async function addTask(title: string) {
   const response = await fetch(`${apiUrl}/users/${userId}/tasks/`, {
     method: 'POST',
-    body: JSON.stringify({ title })
+    body: JSON.stringify({ title }),
+    headers: { 'Content-Type': 'application/json' }
   });
   const task = await response.json() as Task;
   tasks?.push(task);
@@ -45,6 +46,7 @@ export async function setTaskCompleted(task: Task, completed: boolean) {
   task.completed = completed;
   await fetch(`${apiUrl}/tasks/${task.id}`, {
     method: 'PATCH',
-    body: JSON.stringify({ completed })
+    body: JSON.stringify({ completed }),
+    headers: { 'Content-Type': 'application/json' }
   });
 }
