@@ -993,30 +993,43 @@ az webapp up --sku F1 --name copilot-nodejs-todo --resource-group rg-copilot-nod
 
 Again, accept it, but we'll need to tweak the `--name` option a bit to make it unique, as it will also serve as the URL for your web app. Change it to something like `--name nodejs-todo-YOUR_GITHUB_USERNAME`.
 
-And now we need to retrieve the connection string. Add this comment:
+And now we need to retrieve the Cosmos DB endpoint and key. Add this comment:
 
 ```bash
-# Retrieve cosmosdb connection string
+# Retrieve cosmos endpoint
 ```
 
-And start typing `DATABASE_CONNECTION_STRING=` so it know that we want to get the result inside this variable. Copilot should complete the line with:
+Copilot should suggest something like this:
 
 ```bash
-DATABASE_CONNECTION_STRING=$(az cosmosdb keys list --name copilot-nodejs-todo --resource-group rg-copilot-nodejs-todo --type connection-strings --query "connectionStrings[0].connectionString" -o tsv)
+cosmos_endpoint=$(az cosmosdb show --name copilot-nodejs-todo --resource-group rg-copilot-nodejs-todo --query documentEndpoint --output tsv)
 ```
 
-Almost there! Finally, we need set the environment variable in the web app. Add this comment:
+Accept it. Now we need the key! Hit `enter` to go to the next line, and Copilot might event suggest the next comment for you (if not, add it):
 
 ```bash
-# Set connection string in webapp
+# Retrieve cosmos key
+```
+
+Again, accept the suggestion that should be like this:
+
+```bash
+cosmos_key=$(az cosmosdb keys list --name copilot-nodejs-todo --resource-group rg-copilot-nodejs-todo --query primaryMasterKey --output tsv)
+```
+
+Almost there! Finally, we need set the environment variables in the web app. Add this comment:
+
+```bash
+# Set cosmos variables in web app
 ```
 
 And Copilot should suggest a command like this:
 
 ```bash
-az webapp config appsettings set --name nodejs-todo-YOUR_GITHUB_USERNAME --resource-group rg-copilot-nodejs-todo --settings DATABASE_CONNECTION_STRING=$DATABASE_CONNECTION_STRING
+az webapp config appsettings set --name nodejs-todo-sinedied --resource-group rg-copilot-nodejs-todo --settings COSMOS_ENDPOINT=$cosmos_endpoint COSMOS_KEY=$cosmos_key
 ```
 
+Make sure to check that the settings name are `COSMOS_ENDPOINT` and `COSMOS_KEY`.
 All good! Now we should be set and ready to deploy.
 
 ### Deploying the application

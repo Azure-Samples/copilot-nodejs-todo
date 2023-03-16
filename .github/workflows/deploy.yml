@@ -38,7 +38,10 @@ jobs:
           az cosmosdb create --name copilot-nodejs-todo --resource-group rg-copilot-nodejs-todo
           # Deploy webapp using node 18
           az webapp up --sku F1 --name nodejs-todo-sinedied --resource-group rg-copilot-nodejs-todo --runtime "node|18-lts"
-          # Retrieve cosmosdb connection string
-          DATABASE_CONNECTION_STRING=$(az cosmosdb keys list --name copilot-nodejs-todo --resource-group rg-copilot-nodejs-todo --type connection-strings --query "connectionStrings[0].connectionString" -o tsv)
-          # Set connection string in webapp
-          az webapp config appsettings set --name nodejs-todo-sinedied --resource-group rg-copilot-nodejs-todo --settings DATABASE_CONNECTION_STRING=$DATABASE_CONNECTION_STRING
+          # Retrieve cosmos endpoint
+          cosmos_endpoint=$(az cosmosdb show --name copilot-nodejs-todo --resource-group rg-copilot-nodejs-todo --query documentEndpoint --output tsv)
+          # Retrieve cosmos key
+          cosmos_key=$(az cosmosdb keys list --name copilot-nodejs-todo --resource-group rg-copilot-nodejs-todo --query primaryMasterKey --output tsv)
+          # Set cosmos variables in web app
+          az webapp config appsettings set --name nodejs-todo-sinedied --resource-group rg-copilot-nodejs-todo --settings COSMOS_ENDPOINT=$cosmos_endpoint COSMOS_KEY=$cosmos_key
+

@@ -50,7 +50,7 @@ npm run dev
 
 The application will then be available at http://localhost:4200.
 
-> **Important note**: you need to set the environment variable `DATABASE_CONNECTION_STRING` to a valid [Azure Cosmos DB](https://azure.microsoft.com/products/cosmos-db?WT.mc_id=javascript-0000-yolasors) connection string. You can use the [Try Cosmos](https://cosmos.azure.com/try/) website to get one for testing without the need to deploy one yourself (choose *Azure Cosmos DB for NoSQL*).
+> **Important note**: you need to set the environment variables `COSMOS_ENDPOINT` and `COSMOS_KEY` to a valid [Azure Cosmos DB](https://azure.microsoft.com/products/cosmos-db?WT.mc_id=javascript-0000-yolasors) instance for the server to work. You can use the [Try Cosmos](https://cosmos.azure.com/try/) website to get one for testing without the need to deploy one yourself (choose *Azure Cosmos DB for NoSQL*).
 
 ## Contributing
 
