@@ -568,11 +568,19 @@ describe('DbService', () => {
 
 We've prepared a few things here. We're mocking the Cosmos SDK as we don't want to use the real thing, and we're setting the environment variables needed by the `DbService` class. Then we wrote a first test for the `getTasks()` method.
 
+### Completing the test suite
+
 First, let's add a few more tests. Put your cursor at the end of the `describe()` function, and hit `Enter` to create a new test.
 
 ![Screenshot of Copilot suggesting a new test](./assets/copilot-test-suggestion.png)
 
-If you continue acceptiong Copilot's suggestions, you should end up with a complete test suite for all the methods of the `DbService` class. Note that sometimes Copilot needs a little help to close the final parentheses for each test! We may sometimes think that it has a mind of its own, just making sure you're paying attention 😉.
+<div class="tip" data-title="tip">
+
+> If you're getting results too different from what's shown here, you can try adding the comment `// Test create new task` and start a new test with `it()`. Sometimes, when Copilot doesn't do what you want, giving some hints helps getting the results you're looking for.
+
+</div>
+
+If you continue acceptiong Copilot's suggestions, you should end up with a complete test suite for all the methods of the `DbService` class. Note that sometimes Copilot needs a little help, to get started writing the test or to close the final parentheses for each test. We may sometimes think that it has a mind of its own, just making sure you're paying attention 😉.
 
 <details>
 <summary>Example Copilot suggestions</summary>
@@ -1076,12 +1084,10 @@ gh repo view -w
 
 Select the **Actions** tab, and you should see the workflow running. It will take a few minutes to complete so you can grab a cup of coffee ☕. You can follow the progress in the logs by clicking on the running workflow.
 
-TODO
 ![Screenshot showing GitHub Actions workflow running](./assets/gh-actions.png)
 
-Then select the job name **build_and_deploy** on the left, and you should see the logs of the workflow.
+Then select the job name **build** (or whatever name Copilot came up with) on the left, and you should see the logs of the workflow.
 
-TODO
 ![Screenshot showing GitHub Actions workflow logs](./assets/gh-workflow-details.png)
 
 When the workflow is complete, you should see a green checkmark.
@@ -1107,7 +1113,7 @@ Open the URL returned by the command, and you should then see the website.
 
 ## Conclusion
 
-That's it, the end of the workshop. As advertised, we *did* pair program with Copilot, but let's be honest, sometimes we felt more as the assitant as Copilot did most of the hard work for use. Like in any pair programming session, we still had to check what Copilot was doing, and guide it to the right direction. But overall, in a matter of minutes we were able to complete and deploy our application with minimal effort.
+That's it, the end of the workshop. As advertised, we *did* pair program with Copilot, but let's be honest, sometimes we felt more as the assitant as Copilot did most of the hard work for us. Like in any pair programming session, we still had to check what Copilot was doing, and guide it to the right direction. But overall, in a matter of minutes we were able to complete and deploy our application with minimal effort.
 
 We hope you enjoyed following along, learned something new and more importantly, that you'll be able to take this experience back to your projects.
 
