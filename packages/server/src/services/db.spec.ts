@@ -51,8 +51,6 @@ describe('DbService', () => {
     };
     const CosmosClient = require('@azure/cosmos').CosmosClient;
     CosmosClient.mockImplementation(() => mockClient);
-
-
   });
 
   it('should get all tasks for a user', async () => {

@@ -27,7 +27,6 @@ rm -rf packages/server/src/services/db.*ts
 
 echo "import express from 'express';
 import { Task } from '../models/task';
-import { DbService } from '../services/db';
 
 const router = express.Router();
 
