@@ -65,11 +65,11 @@ Para se inscrever, vá para o [GitHub Copilot Labs](https://githubnext.com/proje
 
 Abra [este repositório do GitHub](https://github.com/Azure-Samples/copilot-nodejs-todo-template), selecione o botão **Fork** e clique em **Create fork** para criar uma cópia do projeto em sua própria conta do GitHub.
 
-![Captura de tela do GitHub mostrando o botão Fork.](../assets/fork-project.png)
+![Captura de tela do GitHub mostrando o botão Fork.](./assets/fork-project.png)
 
 Depois de criar o fork, selecione o botão **Code**, em seguida, a guia **Codespaces** e clique em **Create Codespaces on main**.
 
-![Captura de tela do GitHub mostrando a criação de Codespaces.](../assets/create-codespaces.png)
+![Captura de tela do GitHub mostrando a criação de Codespaces.](./assets/create-codespaces.png)
 
 Isso iniciará a criação de um ambiente de contêiner de desenvolvimento, que é um contêiner pré-configurado com todas as ferramentas necessárias instaladas. Quando estiver pronto, você terá tudo o que precisa para começar a codificar. Ele até executou o `npm install` para você!
 
@@ -95,7 +95,7 @@ Depois disso, você precisa clonar o projeto em sua máquina:
 
 1. Selecione o botão **Code**, depois a guia **Local** e copie a URL do seu repositório.
 
-![Captura de tela do GitHub mostrando a URL do repositório](../assets/github-clone.png)
+![Captura de tela do GitHub mostrando a URL do repositório](./assets/github-clone.png)
 
 2. Abre o terminal e execute:
 
@@ -105,13 +105,13 @@ git clone <url-do-seu-repositorio>
 
 1. Abra o projeto no VS Code, abra a paleta de comandos com `Ctrl+Shift+P` (ou `Command+Shift+P` no macOS) e digite **Reopen in Container**.
 
-![Captura de tela do VS Code mostrando o comando "Reabrir em contêiner"](../assets/vscode-reopen-in-container.png)
+![Captura de tela do VS Code mostrando o comando "Reabrir em contêiner"](./assets/vscode-reopen-in-container.png)
 
 Na primeira vez, levará algum tempo para baixar e configurar a imagem do contêiner, enquanto isso você pode prosseguir e ler as próximas seções.
 
 Assim que o contêiner estiver pronto, você verá `Dev Container: Node.js` no canto inferior esquerdo do Visual Studio Code:
 
-![Captura de tela do VS Code mostrando o status do contêiner Dev](../assets/vscode-dev-container-status.png)
+![Captura de tela do VS Code mostrando o status do contêiner Dev](./assets/vscode-dev-container-status.png)
 
 #### [opcional] Trabalhar localmente sem o contêiner de desenvolvimento
 
@@ -193,7 +193,7 @@ Depois que o pacote for instalado, crie uma nova pasta `packages/server/src/serv
 
 Assim que você terminar de digitar e pressionar enter, o Copilot sugerirá a primeira importação para você:
 
-![Captura de tela do VS Code mostrando o Copilot sugerindo a importação](../assets/copilot-import.png)
+![Captura de tela do VS Code mostrando o Copilot sugerindo a importação](./assets/copilot-import.png)
 
 <div class="tip" data-title="tip">
 
@@ -508,7 +508,7 @@ Nosso serviço de banco de dados está quase perfeito agora, mas ainda há uma c
 
 Na barra de ferramentas do Visual Studio Code, selecione `Copilot Labs`
 
-![Screenshot of Copilot Labs tab in VS Code](../assets/copilot-labs.png)
+![Screenshot of Copilot Labs tab in VS Code](./assets/copilot-labs.png)
 
 Selecione as duas linhas problemáticas no seu código:
 
@@ -519,7 +519,7 @@ private container: any;
 
 Assim que elas forem destacadas, clique no botão **Add types** no painel **Brushes**:
 
-![Captura de tela do painel de pincéis do Copilot Labs no VS Code destacando o botão "Add Types".](../assets/copilot-labs-add-types.png)
+![Captura de tela do painel de pincéis do Copilot Labs no VS Code destacando o botão "Add Types".](./assets/copilot-labs-add-types.png)
 
 
 O Copilot agora tentará encontrar os tipos corretos para suas variáveis. Levará alguns segundos, mas assim que terminar, você deve ver algo como isso:
@@ -537,7 +537,7 @@ private container: Container;
 
 TypeScript está nos mostrando um erro agora, porque estamos usando os tipos `Database` e `Container` do Cosmos SDK, mas não os importamos no arquivo. Clique na lâmpada azul para abrir as opções de correções rápidas do Visual Studio Code e selecione **Add all missing imports**:
 
-![Captura do Visual Studio Code](../assets/vscode-auto-import.png)
+![Captura do Visual Studio Code](./assets/vscode-auto-import.png)
 
 Oh não, uma vez que fazemos isso, obtemos novos erros! Parece que os tipos de retorno dos métodos `createTask()` e `updateTask()` estão errados. Substitua de `Promise<Task>` por `Promise<Task | undefined>` para ambos os métodos e você deve estar pronto para seguir em frente.
 
@@ -591,7 +591,7 @@ Preparamos algumas coisas aqui. Estamos simulando o Cosmos SDK, pois não querem
 
 Primeiro, vamos adicionar alguns testes. Coloque o cursor no final da função `describe()` e pressione `Enter` para criar um novo teste.
 
-![Captura de tela Copilot dando sugestão de um novo teste](../assets/copilot-test-suggestion.png)
+![Captura de tela Copilot dando sugestão de um novo teste](./assets/copilot-test-suggestion.png)
 
 <div class="tip" data-title="tip">
 
@@ -675,12 +675,12 @@ Como esperado, ele falha. Mas isso é uma coisa boa, pois escrever bons testes �
 
 Para fazer funcionar, precisamos implementar corretamente as simulações para os métodos do Cosmos SDK. Coloque o cursor no final da função `beforeAll()` e pressione `Enter`.
 
-![Captura de tela da sugestão do Copilot em relação ao mock do Cosmos SDK](../assets/copilot-mock-suggestion.png)
+![Captura de tela da sugestão do Copilot em relação ao mock do Cosmos SDK](./assets/copilot-mock-suggestion.png)
 
 Uau, o Copilot parece saber o que queremos fazer! Vamos aceitar este comentário.
 Desta vez, em vez de aceitar a primeira sugestão, vamos abrir o **Copilot toolbar** para ver todas as sugestões e escolher a que nos parece melhor.
 
-![Captura do Copilot toolbar](../assets/copilot-toolbar.png)
+![Captura do Copilot toolbar](./assets/copilot-toolbar.png)
 
 Um novo painel deve ser aberto no lado direito da tela, onde você pode rolar por todas as sugestões que o Copilot tem para você. Depois de encontrar a que você gosta, clique em **Accept Solution** para inserir o código e fechar o painel.
 
@@ -688,11 +688,11 @@ Salve o arquivo e execute os testes novamente. Oh não, 4 dos 5 testes ainda est
 
 Role para cima para ver a primeira falha no teste e você verá que `fetchAll()` não é uma função, o que significa que não foi mockada corretamente. Vamos corrigir isso.
 
-![Captura de tela da saída do Jest mostrando a primeira falha de teste](../assets/jest-test-failure.png)
+![Captura de tela da saída do Jest mostrando a primeira falha de teste](./assets/jest-test-failure.png)
 
 No método que está mockado `query()`, remova esta linha `resources: []` de sua implementação atual e aguarde o Copilot sugerir algo.
 
-![Captura de tela do Copilot sugerindo uma nova linha de código](../assets/copilot-mock-fix-suggestion.png)
+![Captura de tela do Copilot sugerindo uma nova linha de código](./assets/copilot-mock-fix-suggestion.png)
 
 <details>
 <summary>Example Copilot suggestion</summary>
@@ -709,7 +709,7 @@ fetchAll: () => ({
 Sim, é isso mesmo! O Copilot acompanhou e está corrigindo seu próprio erro!
 Vamos aceitar as sugestões até que esteja completo e executar os testes novamente. Desta vez, os últimos 3 testes falham. Vamos ver o que está acontecendo com o primeiro.
 
-![Captura de tela mostrando a saída do jest com o teste falhando.](../assets/jest-test-failure-2.png)
+![Captura de tela mostrando a saída do jest com o teste falhando.](./assets/jest-test-failure-2.png)
 
 Okay, parece que houve um pequeno erro, já que `container.item` não está sendo mockado corretamente e, olhando para os mocks gerados pelo Copilot, tudo foi adicionado à propriedade `items`, e não `item`. Vamos corrigir isso.
 
@@ -771,7 +771,7 @@ const mockClient = {
 
 Execute os testes novamente e... um último erro!
 
-![Captura de tela da saída do Jest mostrando a terceira falha de teste.](../assets/jest-test-failure-3.png)
+![Captura de tela da saída do Jest mostrando a terceira falha de teste.](./assets/jest-test-failure-3.png)
 
 Isso mesmo! O Copilot fez o mock do método `upsert()`, mas não fez o mock do método `replace()`. Basta renomear `upsert` para `replace` e desta vez, todos os testes devem passar!
 
@@ -804,7 +804,7 @@ import { DbService } from '../services/db';
 Em seguida, avance para o nosso primeiro TODO: `// TODO: retorne as tasks da base de dados`
 Na linha abaixo, substitua o lado direito da atribuição por `await DbService.getInstance`. Conforme você digita, o Copilot deve completar o código para você.
 
-![Captura de tela do Copilot completando o código](../assets/copilot-dbservice-1.png)
+![Captura de tela do Copilot completando o código](./assets/copilot-dbservice-1.png)
 
 Aceite a sugestão e você concluiu o primeiro TODO, agora pode remover o comentário.
 
@@ -815,7 +815,7 @@ Mova-se para o próximo TODO, `// TODO: crie uma task na base de dados`.
 Na linha abaixo, apenas digite await e Copilot deve fazer sua mágica novamente:
 
 
-![Captura de tela do Copilot completando o código](../assets/copilot-dbservice-2.png)
+![Captura de tela do Copilot completando o código](./assets/copilot-dbservice-2.png)
 
 Aceite a sugestão. Mas espere, algo está faltando aqui, não estamos verificando se a tarefa fornecida é válida! Vamos garantir que a tarefa tenha um `title` seja definido antes de adicioná-la ao banco de dados.
 
@@ -841,7 +841,7 @@ if (!task.title) {
 O próximo TODO é `// TODO: obter uma task do banco de dados`.
 Agora você sabe o que fazer, substitua a parte da direita da atribuição abaixo por `await` e deixe o Copilot completar isso para você.
 
-![Captura de tela do Copilot completando o código](../assets/copilot-dbservice-3.png)
+![Captura de tela do Copilot completando o código](./assets/copilot-dbservice-3.png)
 
 Remova o comentário TODO e vamos para a próxima sessão. 
 
@@ -850,11 +850,11 @@ Remova o comentário TODO e vamos para a próxima sessão.
 O próximo TODO é `// TODO: obter uma task existente no banco de dados.`
 Da mesma forma que antes, substitua a parte da direita da atribuição abaixo por `await` e deixe o Copilot completar isso para você.
 
-![Captura de tela do Copilot completando o código](../assets/copilot-dbservice-4.png)
+![Captura de tela do Copilot completando o código](./assets/copilot-dbservice-4.png)
 
 Agora, faça a mesma coisa novamente para o próximo TODO, `// TODO: atualizar uma task no banco de dados`.
 
-![Captura de tela do Copilot completando o código](../assets/copilot-dbservice-5.png)
+![Captura de tela do Copilot completando o código](./assets/copilot-dbservice-5.png)
 
 
 Remova o comentário TODO e vamos para a última rota.
@@ -863,7 +863,7 @@ Remova o comentário TODO e vamos para a última rota.
 
 Por último, faremos o mesmo procedimento novamente para o TODO `// TODO: excluir uma task no banco de dados`. Na linha abaixo do comentário, digite apenas await e deixe o Copilot completá-lo para você.
 
-![Captura de tela do Copilot completando o código](../assets/copilot-dbservice-6.png)
+![Captura de tela do Copilot completando o código](./assets/copilot-dbservice-6.png)
 
 Remova o comentário final do TODO e nossa API agora está completa.
 Não deu muito trabalho, concordam comigo?
@@ -1097,7 +1097,7 @@ gh repo view -w
 
 Selecione a guia **Actions** e você verá o fluxo de trabalho sendo executado. Levará alguns minutos para ser concluído. Se você desejar, pode pegar até pegar uma xícara de café ☕. Você pode acompanhar o progresso nos registros clicando em: **running workflow**.
 
-![Captura de tela mostrando o fluxo de trabalho do GitHub Actions em execução](../assets/gh-actions.png)
+![Captura de tela mostrando o fluxo de trabalho do GitHub Actions em execução](./assets/gh-actions.png)
 
 Em seguida, selecione o nome da tarefa **build** (ou qualquer outro nome que o Copilot tenha sugerido) à esquerda e você verá os registros do fluxo de trabalho.
 
@@ -1119,7 +1119,7 @@ az webapp show \
 
 Abra a URL retornada pelo comando e você verá o site.
 
-![Captura de tela mostrando o site implantado](../assets/app-deployed.png)
+![Captura de tela mostrando o site implantado](./assets/app-deployed.png)
 
 ---
 
