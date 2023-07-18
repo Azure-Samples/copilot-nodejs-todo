@@ -1058,10 +1058,17 @@ Almost there! Finally, we need set the environment variables in the web app. Add
 And Copilot should suggest a command like this:
 
 ```bash
-az webapp config appsettings set --name nodejs-todo-sinedied --resource-group rg-copilot-nodejs-todo --settings COSMOS_ENDPOINT=$cosmos_endpoint COSMOS_KEY=$cosmos_key
+az webapp config appsettings set --name nodejs-todo-sinedied --resource-group rg-copilot-nodejs-todo --settings COSMOS_ENDPOINT=$cosmos_endpoint COSMOS_KEY=$cosmos_key --output none
 ```
 
-Make sure to check that the settings name are `COSMOS_ENDPOINT` and `COSMOS_KEY`.
+Check that the settings name are `COSMOS_ENDPOINT` and `COSMOS_KEY`, as it's important that they match the ones used in the code.
+
+<div class="important" data-title="Important">
+
+> Make sure this command ends with `--output none` to avoid leaking the Cosmos DB key in the logs! Add it if it's not there.
+
+</div>
+
 All good! Now we should be set and ready to deploy.
 
 ### Deploying the application
