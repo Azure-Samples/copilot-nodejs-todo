@@ -17,7 +17,7 @@ sections_title:
 
 # Using GitHub Copilot to quickly build a Node.js application with Azure Cosmos DB and App Service
 
-In this workshop, we'll explore how GitHub Copilot can be used to accelerate the development and deployment of a Node.js application. 
+In this workshop, we'll explore how GitHub Copilot can be used to accelerate the development and deployment of a Node.js application with Azure Cosmos DB as a data store. 
 
 MyTodo is an [Express](https://expressjs.com/) app implementing a Todo list application. The application is mostly done, but needs a data service to talk to [Azure Cosmos DB](https://azure.microsoft.com/services/cosmos-db/) so we can store and retrieve the data. We also need to write some documentation, complete the tests and connect it to our API. Finally, we'll setup a CI/CD pipeline to deploy our app to [Azure App Service](https://azure.microsoft.com/services/app-service/), using [GitHub Actions](https://github.com/features/actions).
 
@@ -56,9 +56,7 @@ Before starting the development, we'll need to setup our project and development
 
 To use GitHub Copilot, you need to either enroll as an individual or use Copilot for Business:   [see GitHub Copilot plans](https://github.com/features/copilot#pricing). If you're not already enrolled, you can start a free trial at the URL above.
 
-Once you're enrolled, you need to sign up for the [GitHub Copilot Labs](https://githubnext.com/projects/copilot-labs/) program. This will give you access to new experimental features we'll use in this workshop.
-
-To sign up, go to [GitHub Copilot Labs](https://githubnext.com/projects/copilot-labs/) and select **Sign up for Copilot Labs**. Follow the instructions to activate it on your GitHub account and you're all set!
+Once you're enrolled, you need to install  up for the [GitHub Copilot extension](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot). When you install this extension, the [GitHub Copilot Chat extension](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat) is also installed.
 
 ### Create the project
 
@@ -167,7 +165,7 @@ Our Todo application is *almost* complete. We need to add a database to store th
 
 <div class="info" data-title="About Azure Cosmos DB">
 
->Azure Cosmos DB is a fully managed NoSQL database service that offers multiple APIs, including SQL, MongoDB, Cassandra, Gremlin, and Azure Table storage. It's a globally distributed database, which means that your data can be replicated across multiple regions, and you can choose the closest region to your users to reduce latency. For our needs, we'll be using the SQL API along with the Node.js SDK. 
+>Azure Cosmos DB is Microsoft's fully managed and serverless distributed database with support for NoSQL and relational workloads. It offers global distribution across all Azure regions transparently replicating your data wherever your users are. Develop applications using open-source database engines, including PostgreSQL, MongoDB, and Cassandra. Get automatic scalability, enterprise-grade security, and cost-effective consumption-based pricing. For our needs, we'll be using the SQL API along with the Node.js SDK. 
 >
 >Surely, that may sound a bit strange, using SQL to access a NoSQL database? But don't worry, it's not a mistake. Cosmos DB is a *multi-model database*, which means that it can support different ways of accessing the data. SQL is the most common way of querying data, so it feels familiar to most developers and makes it easy to get started. Still, you must not forget that it's not relational database, so you can't make very complex queries and joins have to be avoided because of their performance impact.
 
@@ -185,7 +183,7 @@ npm install @azure/cosmos
 Once it's installed the package, create a new folder `packages/server/src/services/`. Inside this folder create the file `db.ts` and start typing the following content in it:
 
 ```ts
-// Import Cosmos SDK and task model
+// Import Azure Cosmos SDK and task model
 ```
 
 As soon as you finish typing and hit enter, Copilot will suggest the first import for you:
@@ -213,9 +211,9 @@ Accept the suggestion by hitting the `Tab` key, hit `Enter` and accept the next 
 Then continue by adding the following comment:
 
 ```ts
-// Create a DbService class to wrap the Cosmos SDK,
+// Create a DbService class to wrap the  Cosmos SDK with URI and key,
 // connecting to the 'todos' database and 'tasks' container
-// and with CRUD methods for tasks
+// and with CRUD methods for tasks with proper naming
 ```
 
 After hitting enter, and accept the suggestions as they come: Copilot should suggest a complete class definition for you!
@@ -226,61 +224,34 @@ After hitting enter, and accept the suggestions as they come: Copilot should sug
 ```ts
 export class DbService {
   private client: CosmosClient;
-  private database: any;
-  private container: any;
+  private container;
 
   constructor() {
-    // Connect to the database
     this.client = new CosmosClient({
       endpoint: process.env.COSMOS_ENDPOINT,
-      key: process.env.COSMOS_KEY
+      key: process.env.COSMOS_KEY,
     });
-    this.database = this.client.database("todos");
-    this.container = this.database.container("tasks");
+
+    this.container = this.client
+      .database('todos')
+      .container('tasks');
   }
 
-  // Create a new task
-  async createTask(task: Task): Promise<Task> {
-    // Create a new task in the database
-    const { resource: createdItem } = await this.container.items.create(task);
-
-    // Return the new task
-    return createdItem;
+  async createTask(task: Task) {
+    await this.container.items.create(task);
   }
 
-  // Get a task by id
-  async getTask(id: string): Promise<Task> {
-    // Get the task from the database
-    const { resource: task } = await this.container.item(id).read();
-
-    // Return the task
-    return task;
+  async readTasks() {
+    const { resources } = await this.container.items.readAll().fetchAll();
+    return resources;
   }
 
-  // Get all tasks
-  async getTasks(): Promise<Task[]> {
-    // Get all tasks from the database
-    const { resources: tasks } = await this.container.items.readAll().fetchAll();
-
-    // Return the tasks
-    return tasks;
+  async updateTask(task: Task) {
+    await this.container.item(task.id).replace(task);
   }
 
-  // Update a task
-  async updateTask(task: Task): Promise<Task> {
-    // Update the task in the database
-    const { resource: updatedItem } = await this.container
-      .item(task.id)
-      .replace(task);
-
-    // Return the updated task
-    return updatedItem;
-  }
-
-  // Delete a task
-  async deleteTask(id: string): Promise<void> {
-    // Delete the task from the database
-    await this.container.item(id).delete();
+  async deleteTask(task: Task) {
+    await this.container.item(task.id).delete();
   }
 }
 ```
@@ -289,7 +260,7 @@ export class DbService {
 
 <div class="info" data-title="note">
 
-> Copilot generates new code for you dynamically, so the suggestion you get might be a bit different from the one shown here. But the idea is the same: it's a complete class definition with all the functions you need to implement the database service. If the suggestion is not to your liking, you can also cycle between differents suggestions using `Alt+]` (`Option+]` on macOS).
+> Copilot generates new code for you dynamically, so the suggestion you get might be a bit different from the one shown here. But the idea is the same: it's a complete class definition with all the functions you need to implement the database service. If the suggestion is not to your liking, you can also cycle between differents suggestions using `Alt+]` (`Option+]` on macOS) and `Alt+]` (`Alt+[` on Windows)
 
 </div>
 
@@ -325,23 +296,26 @@ if (!process.env.COSMOS_KEY) {
 
 Now look at the different methods Copilot generated for us. While it all looks correct, we would like to change the `getTasks()` method so that it only returns the tasks for a specified user ID.
 
-To do that, delete the `getTasks()` function entirely and replace it with the comment `// Get all tasks for a user`. Then let Copilot generate it again for us. It will suggest new code line by line, accept the suggestions as they come until the function is complete.
+To do that, delete the `readTasks()` function entirely and replace it with the comment `// Get all tasks for a user based on userId`. Then let Copilot generate it again for us. It will suggest new code line by line, accept the suggestions as they come until the function is complete.
 
 <details>
 <summary>Example Copilot suggestion</summary>
 
 ```ts
-async getTasks(userId: string): Promise<Task[]> {
-  // Get the tasks from the database
-  const { resources: tasks } = await this.container
-    .items.query({
-      query: "SELECT * FROM c WHERE c.userId = @userId",
-      parameters: [{ name: "@userId", value: userId }]
-    })
-    .fetchAll();
+  async getTasks(userId: string): Promise<Task[]> {
+    const querySpec = {
+      query: 'SELECT * FROM c WHERE c.userId = @userId',
+      parameters: [
+        {
+          name: '@userId',
+          value: userId,
+        },
+      ],
+    };
 
-  // Return the tasks
-  return tasks;
+    const { resources } = await this.container.items.query(querySpec).fetchAll();
+    return resources;
+  }rn tasks;
 }
 ```
 
@@ -490,11 +464,11 @@ public static getInstance(): DbService {
 
 Don't you agree that this looks like black magic? We didn't even tell Copilot what we wanted, and it just gave us the code we needed. How useful is that?
 
-### (Optional) Fix missing types with Copilot Labs
+### (Optional) Fix missing types with Copilot chat
 
 Our database service is now almost perfect, but there's still one thing that bothers me: the types. We're using `any` for the `database` and `container` properties, which is not ideal. We could go back to the Cosmos SDK documentation and try to find the right types, but that would be a lot of work. Let's see if Copilot can help us with that.
 
-In the VS Code toolbar, select the `Copilot Labs` tab:
+In the VS Code toolbar, select the `Copilot Chat` from the menu:
 
 ![Screenshot of Copilot Labs tab in VS Code](./assets/copilot-labs.png)
 
