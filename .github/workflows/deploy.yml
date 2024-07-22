@@ -33,7 +33,7 @@ jobs:
       - name: Deploy to Azure
         run: |
           # Create resource group rg-copilot-nodejs-todo
-          az group create --name rg-copilot-nodejs-todo --location eastus
+          az group create --name rg-copilot-nodejs-todo --location westeurope
           # Create cosmosdb with default api
           az cosmosdb create --name copilot-nodejs-todo --resource-group rg-copilot-nodejs-todo
           # Create database todos with collection tasks
