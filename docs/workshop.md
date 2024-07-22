@@ -165,7 +165,7 @@ Our Todo application is *almost* complete. We need to add a database to store th
 
 <div class="info" data-title="About Azure Cosmos DB">
 
->Azure Cosmos DB is Microsoft's fully managed and serverless distributed database with support for NoSQL and relational workloads. It offers global distribution across all Azure regions transparently replicating your data wherever your users are. Develop applications using open-source database engines, including PostgreSQL, MongoDB, and Cassandra. Get automatic scalability, enterprise-grade security, and cost-effective consumption-based pricing. For our needs, we'll be using the SQL API along with the Node.js SDK. 
+>Azure Cosmos DB is Microsoft's fully managed and serverless distributed database with support for NoSQL and relational workloads. It offers global distribution across all Azure regions transparently replicating your data wherever your users are. Develop applications using open-source database engines, including PostgreSQL, MongoDB, and Cassandra. Get automatic scalability, enterprise-grade security, and cost-effective consumption-based pricing. For our needs, we'll be using the NOSQL API along with the Node.js SDK. 
 >
 >Surely, that may sound a bit strange, using SQL to access a NoSQL database? But don't worry, it's not a mistake. Cosmos DB is a *multi-model database*, which means that it can support different ways of accessing the data. SQL is the most common way of querying data, so it feels familiar to most developers and makes it easy to get started. Still, you must not forget that it's not relational database, so you can't make very complex queries and joins have to be avoided because of their performance impact.
 
@@ -211,9 +211,9 @@ Accept the suggestion by hitting the `Tab` key, hit `Enter` and accept the next 
 Then continue by adding the following comment:
 
 ```ts
-// Create a DbService class to wrap the Cosmos SDK with URI and key,
+// Create a DbService class to wrap the Cosmos SDK with URI and key from an environment variable
 // connecting to the 'todos' database and 'tasks' container
-// and with CRUD methods for tasks with proper naming
+// and with CRUD methods for tasks
 ```
 
 After hitting enter, and accept the suggestions as they come: Copilot should suggest a complete class definition for you!
@@ -222,6 +222,13 @@ After hitting enter, and accept the suggestions as they come: Copilot should sug
 <summary>Example Copilot suggestion</summary>
 
 ```ts
+ // Import Azure Cosmos SDK and task model
+import { CosmosClient } from '@azure/cosmos';
+import { Task } from '../models/task';
+
+// Create a DbService class to wrap the Cosmos SDK with URI and key from an environment variable
+// connecting to the 'todos' database and 'tasks' container
+// and with CRUD methods for tasks
 export class DbService {
   private client: CosmosClient;
   private container;
@@ -231,29 +238,36 @@ export class DbService {
       endpoint: process.env.COSMOS_ENDPOINT,
       key: process.env.COSMOS_KEY,
     });
-
     this.container = this.client
       .database('todos')
       .container('tasks');
   }
 
-  async createTask(task: Task) {
-    await this.container.items.create(task);
-  }
-
-  async readTasks() {
+  async getTasks() {
     const { resources } = await this.container.items.readAll().fetchAll();
     return resources;
   }
 
-  async updateTask(task: Task) {
-    await this.container.item(task.id).replace(task);
+  async getTask(id: string) {
+    const { resource } = await this.container.item(id).read();
+    return resource;
   }
 
-  async deleteTask(task: Task) {
-    await this.container.item(task.id).delete();
+  async createTask(task: Task) {
+    const { resource } = await this.container.items.create(task);
+    return resource;
+  }
+
+  async updateTask(id: string, task: Task) {
+    const { resource } = await this.container.item(id).replace(task);
+    return resource;
+  }
+
+  async deleteTask(id: string) {
+    await this.container.item(id).delete();
   }
 }
+
 ```
 
 </details>
@@ -296,7 +310,7 @@ if (!process.env.COSMOS_KEY) {
 
 Now look at the different methods Copilot generated for us. While it all looks correct, we would like to change the `getTasks()` method so that it only returns the tasks for a specified user ID.
 
-To do that, delete the `readTasks()` function entirely and replace it with the comment `// Get all tasks for a user based on userId`. Then let Copilot generate it again for us. It will suggest new code line by line, accept the suggestions as they come until the function is complete.
+To do that, delete the `getTasks()` function entirely and replace it with the comment `// Get all tasks for a user based on userId`. Then let Copilot generate it again for us. It will suggest new code line by line, accept the suggestions as they come until the function is complete.
 
 <details>
 <summary>Example Copilot suggestion</summary>
