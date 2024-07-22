@@ -338,85 +338,66 @@ To do that, delete the `getTasks()` function entirely and replace it with the co
 The final result should look like this:
 
 ```ts
-// Import Cosmos SDK and task model
-import { CosmosClient } from "@azure/cosmos";
-import { Task } from "../models/task";
+// Import Azure Cosmos SDK and task model
+import { CosmosClient } from '@azure/cosmos';
+import { Task } from '../models/task';
 
-// Create a DbService class to wrap the Cosmos SDK,
-// connecting to the 'todos' database and 'tasks' container
-// and with CRUD methods for tasks
+/**
+ * Service to interact with the Azure Cosmos DB database
+ * This service is responsible for all CRUD operations on the database
+ * It uses the Azure Cosmos SDK to interact with the database
+ * The service is initialized with the CosmosClient and the container
+ */
 export class DbService {
+
   private client: CosmosClient;
-  private database: any;
-  private container: any;
+  private container;
 
   constructor() {
     // Check that the environment variables are set
-    if (!process.env.COSMOS_ENDPOINT) {
-      throw new Error("COSMOS_ENDPOINT is not set");
+    if (!process.env.COSMOS_ENDPOINT || !process.env.COSMOS_KEY) {
+      throw new Error('Please define COSMOS_ENDPOINT and COSMOS_KEY in your environment');
     }
-    if (!process.env.COSMOS_KEY) {
-      throw new Error("COSMOS_KEY is not set");
-    }
-
-    // Connect to the database
     this.client = new CosmosClient({
       endpoint: process.env.COSMOS_ENDPOINT,
-      key: process.env.COSMOS_KEY
+      key: process.env.COSMOS_KEY,
     });
-    this.database = this.client.database("todos");
-    this.container = this.database.container("tasks");
+    this.container = this.client
+      .database('todos')
+      .container('tasks');
   }
 
-  // Create a new task
-  async createTask(task: Task): Promise<Task> {
-    // Create a new task in the database
-    const { resource: createdItem } = await this.container.items.create(task);
-
-    // Return the new task
-    return createdItem;
-  }
-
-  // Get a task by id
-  async getTask(id: string): Promise<Task> {
-    // Get the task from the database
-    const { resource: task } = await this.container.item(id).read();
-
-    // Return the task
-    return task;
-  }
-
-  // Get all tasks for a user
-  async getTasks(userId: string): Promise<Task[]> {
-    // Get the tasks from the database
-    const { resources: tasks } = await this.container
-      .items.query({
-        query: "SELECT * FROM c WHERE c.userId = @userId",
-        parameters: [{ name: "@userId", value: userId }]
+ //Get all tasks for a user based on userId
+  async getTasks(userId: string) {
+    const { resources } = await this.container.items
+      .query({
+        query: 'SELECT * FROM tasks t WHERE t.userId = @userId',
+        parameters: [{ name: '@userId', value: userId }],
       })
       .fetchAll();
-
-    // Return the tasks
-    return tasks;
+    return resources;
   }
 
-  // Update a task
-  async updateTask(task: Task): Promise<Task> {
-    // Update the task in the database
-    const { resource: updatedItem } = await this.container
-      .item(task.id)
-      .replace(task);
-
-    // Return the updated task
-    return updatedItem;
+  async getTask(id: string) {
+    const { resource } = await this.container.item(id).read();
+    return resource;
   }
 
-  // Delete a task
-  async deleteTask(id: string): Promise<void> {
-    // Delete the task from the database
+  async createTask(task: Task) {
+    const { resource } = await this.container.items.create(task);
+    return resource;
+  }
+
+  async updateTask(id: string, task: Task) {
+    const { resource } = await this.container.item(id).replace(task);
+    return resource;
+  }
+
+  async deleteTask(id: string) {
     await this.container.item(id).delete();
   }
 }
+
 ```
 
 Of course, the code might not perfect (remember that the suggestions you get may be a bit different), but it's a good start given the little effort we had to put in. It's missing some type definitions, but keeping in mind that we only had to write a few comments to get a working database service, it's pretty amazing! And we didn't even had to go read the documentation of the Cosmos SDK.
@@ -453,15 +434,12 @@ And instead, start typing `/**` to add a JSDoc comment, and hit enter. Copilot w
 
 Not bad, right? Wait, it's even mentioning something we forgot: the `DbService` class should be a singleton, as we don't want to create multiple connections to the database. Let's fix that.
 
-This time, we'll try to use some black magic 👀.
-
-Put your cursor at the end of this line in the `DbService` class:
+You can add a comment stating 
 
 ```ts
-private container: any;
-```
+//   // Create a singleton instance of DbService and get that instance
 
-Wow, now it even suggests you the comments! Accept that and continue, until you get what we need. You should end up with something like this:
+You should end up with something like this:
 
 ```ts
 // The singleton instance
@@ -486,37 +464,16 @@ In the VS Code toolbar, select the `Copilot Chat` from the menu:
 
 ![Screenshot of Copilot Chat tab in VS Code](./assets/copilot-chat.png)
 
-Select the two problematic lines in your code:
+Select the lines in your code to fix issues. Once they're highlighted, click on the **/fix the problems in my code**:
 
-```ts
-private database: any;
-private container: any;
-```
+![Screenshot of Copilot Labs brushes panel in VS Code highlighting the "Add Types" button](./assets/copilot-chat-fix.PNG)
+ 
 
-Once they're highlighted, click on the **Add types** button in the **Brushes** panel:
-
-![Screenshot of Copilot Labs brushes panel in VS Code highlighting the "Add Types" button](./assets/copilot-labs-add-types.png)
-
-Copilot will now try to find the right types for your variables. It will take a few seconds, but once it's done, you should see something like this:
-
-```ts
-private database: Database;
-private container: Container;
-```
-
-<div class="info" data-title="note">
-
-> Copilot Labs is still in beta, so it might not work perfectly every time. If it doesn't, you can always use `CTRL+Z` (`CMD+Z` on macOS) to undo the changes, and try again.
+> Within few seconds, Copilot Chat will generate code with the fixes, and you can simple click on **Apply in Editor** once you're good. If it doesn't, you can always use `CTRL+Z` (`CMD+Z` on macOS) to undo the changes, and try again.
 
 </div>
 
-TypeScript is showing us an error now, because we're using the `Database` and `Container` types from the Cosmos SDK, but we didn't import them. Click on the blue lightbulb to open VS Code's quick fixes options, and select **Add all missing imports**:
-
-![Screenshot of VS Code ](./assets/vscode-auto-import.png)
-
-Oh no, once we do that we get new errors! It seems that the return types of the `createTask()` and `updateTask()` methods are wrong. Replace `Promise<Task>` with `Promise<Task | undefined>` for both methods, and you should be good to go.
-
-Thanks for the catch, TypeScript! 🙏
+Thanks for the fixes, Copilot Chat! 🙏
 
 ---
 
@@ -695,46 +652,118 @@ Then move the `read()`, `upsert()` and `delete()` methods from the `items` block
 You should end up with something like this:
 
 ```ts
-const mockClient = {
-  database: () => ({
-    container: () => ({
-      items: {
-        create: () => ({
-          resource: {
-            id: '123',
-            userId: '123',
-            title: 'test',
-            completed: false
-          }
-        }),
-        query: () => ({
-          fetchAll: () => ({
-            resources: []
-          })
-        }),
-      },
-      item: () => ({
-        read: () => ({
-          resource: {
-            id: '123',
-            userId: '123',
-            title: 'test',
-            completed: false
-          }
-        }),
-        upsert: () => ({
-          resource: {
-            id: '123',
-            userId: '123',
-            title: 'test',
-            completed: true
-          }
-        }),
-        delete: () => ({})
-      }),
-    })
-  })
-};
+import { DbService } from './db';
+
+jest.mock('@azure/cosmos');
+
+describe('DbService', () => {
+  beforeAll(() => {
+    // Set environment variables
+    process.env.COSMOS_ENDPOINT = 'dummy';
+    process.env.COSMOS_KEY = '123';
+
+    // Mock the Cosmos DB client
+    const mockClient = {
+      database: () => ({
+        container: () => ({
+          items: {
+            create: () => ({
+              resource: {
+                id: '123',
+                userId: '123',
+                title: 'test',
+                completed: false
+              }
+            }),
+            query: () => ({
+              fetchAll: () => ({
+                resources: []
+              })
+            }),
+          },
+          item: () => ({
+            read: () => ({
+              resource: {
+                id: '123',
+                userId: '123',
+                title: 'test',
+                completed: false
+              }
+            }),
+            replace: () => ({
+              resource: {
+                id: '123',
+                userId: '123',
+                title: 'test',
+                completed: true
+              }
+            }),
+            delete: () => ({})
+          }),
+        })
+      })
+    };
+    const CosmosClient = require('@azure/cosmos').CosmosClient;
+    CosmosClient.mockImplementation(() => mockClient);
+  });
+
+  it('should get all tasks for a user', async () => {
+    const dbService = new DbService();
+    const tasks = await dbService.getTasks('123');
+    expect(tasks).toEqual([]);
+  });
+
+  it('should create a new task', async () => {
+    const dbService = new DbService();
+    const task = await dbService.createTask({
+      id: '123',
+      userId: '123',
+      title: 'test',
+      completed: false
+    });
+    expect(task).toEqual({
+      id: '123',
+      userId: '123',
+      title: 'test',
+      completed: false
+    });
+  });
+
+  it('should get a task by id', async () => {
+    const dbService = new DbService();
+    const task = await dbService.getTask('123');
+    expect(task).toEqual({
+      id: '123',
+      userId: '123',
+      title: 'test',
+      completed: false
+    });
+  });
+
+  it('should update a task', async () => {
+    const dbService = new DbService();
+    const task = await dbService.updateTask('123', {
+      id: '123',
+      userId: '123',
+      title: 'test',
+      completed: true
+    });
+    expect(task).toEqual({
+      id: '123',
+      userId: '123',
+      title: 'test',
+      completed: true
+    });
+  });
+
+  it('should delete a task', async () => {
+    const dbService = new DbService();
+    const task = await dbService.deleteTask('123');
+    expect(task).toEqual(undefined);
+  });
+
+});
+
 ```
 
 Run the tests again, and... one last failure!
