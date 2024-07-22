@@ -56,7 +56,7 @@ Before starting the development, we'll need to setup our project and development
 
 To use GitHub Copilot, you need to either enroll as an individual or use Copilot for Business:   [see GitHub Copilot plans](https://github.com/features/copilot#pricing). If you're not already enrolled, you can start a free trial at the URL above.
 
-Once you're enrolled, you need to install  up for the [GitHub Copilot extension](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot). When you install this extension, the [GitHub Copilot Chat extension](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat) is also installed.
+Once you're enrolled, you need to install the [GitHub Copilot extension](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot). When you install this extension, the [GitHub Copilot Chat extension](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat) is also installed.
 
 ### Create the project
 
@@ -211,7 +211,7 @@ Accept the suggestion by hitting the `Tab` key, hit `Enter` and accept the next 
 Then continue by adding the following comment:
 
 ```ts
-// Create a DbService class to wrap the  Cosmos SDK with URI and key,
+// Create a DbService class to wrap the Cosmos SDK with URI and key,
 // connecting to the 'todos' database and 'tasks' container
 // and with CRUD methods for tasks with proper naming
 ```
@@ -315,7 +315,7 @@ To do that, delete the `readTasks()` function entirely and replace it with the c
 
     const { resources } = await this.container.items.query(querySpec).fetchAll();
     return resources;
-  }rn tasks;
+  };
 }
 ```
 
@@ -470,7 +470,7 @@ Our database service is now almost perfect, but there's still one thing that bot
 
 In the VS Code toolbar, select the `Copilot Chat` from the menu:
 
-![Screenshot of Copilot Labs tab in VS Code](./assets/copilot-labs.png)
+![Screenshot of Copilot Chat tab in VS Code](./assets/copilot-chat.png)
 
 Select the two problematic lines in your code:
 
