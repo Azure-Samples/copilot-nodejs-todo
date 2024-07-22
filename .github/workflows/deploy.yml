@@ -1,4 +1,4 @@
-# This workflow for our node.js 18 app does the following:
+# This workflow for our node.js 20 app does the following:
 # - run tests
 # - build the app
 # - login to Azure with AZURE_CREDENTIALS github secret
@@ -15,11 +15,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Use Node.js 18
-        uses: actions/setup-node@v2
+      - uses: actions/checkout@v4
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
       - name: Install dependencies
         run: npm ci
       - name: Run tests
@@ -27,7 +27,7 @@ jobs:
       - name: Build
         run: npm run build
       - name: Login to Azure
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: Deploy to Azure
@@ -39,8 +39,8 @@ jobs:
           # Create database todos with collection tasks
           az cosmosdb sql database create --account-name copilot-nodejs-todo --resource-group rg-copilot-nodejs-todo --name todos
           az cosmosdb sql container create --account-name copilot-nodejs-todo --resource-group rg-copilot-nodejs-todo --database-name todos --name tasks --partition-key-path /_partitionKey --throughput 400
-          # Deploy webapp using node 18
-          az webapp up --sku F1 --name nodejs-todo-sinedied --resource-group rg-copilot-nodejs-todo --runtime "node|18-lts"
+          # Deploy webapp using node 20
+          az webapp up --sku F1 --name nodejs-todo-sinedied --resource-group rg-copilot-nodejs-todo --runtime "node|20-lts"
           # Retrieve cosmos endpoint
           cosmos_endpoint=$(az cosmosdb show --name copilot-nodejs-todo --resource-group rg-copilot-nodejs-todo --query documentEndpoint --output tsv)
           # Retrieve cosmos key

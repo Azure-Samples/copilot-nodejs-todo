@@ -120,7 +120,7 @@ Se você deseja trabalhar localmente sem usar um contêiner de desenvolvimento (
 |                  |                                                                                                                  |
 | ---------------- | ---------------------------------------------------------------------------------------------------------------- |
 | Git              | [Download do Git](https://git-scm.com)                                                                           |
-| Node.js v18+     | [Download do Node.js](https://nodejs.org)                                                                        |
+| Node.js v20+     | [Download do Node.js](https://nodejs.org)                                                                        |
 | Azure CLI        | [Download do Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli#install)                         |
 | GitHub CLI       | [Download do GitHub CLI](https://cli.github.com/manual/installation)                                             |
 | Bash v3+         | [Download do Bash](https://www.gnu.org/software/bash/) (usuários Windows podem usar **Git bash** que vem do Git) |
@@ -925,7 +925,7 @@ Para configurar o GitHub Actions para implantação, precisaremos criar um novo 
 Crie um novo arquivo em seu repositório com o caminho .`github/workflows/deploy.yml` e adicione o seguinte conteúdo:
 
 ```yml
-# This workflow for our node.js 18 app does the following:
+# This workflow for our node.js 20 app does the following:
 # - run tests
 # - build the app
 # - login to Azure with AZURE_CREDENTIALS github secret
@@ -935,7 +935,7 @@ Crie um novo arquivo em seu repositório com o caminho .`github/workflows/deploy
 Depois de dar `Enter`, o Copilot pode tentar completar os comentários, mas não é isso que queremos. Então ignore se for esse o caso pressionando `Enter` novamente. Ele não deve começar a completar o fluxo de trabalho, continue aceitando sugestões até acabar com algo como isto:
 
 ```yaml
-# This workflow for our node.js 18 app does the following:
+# This workflow for our node.js 20 app does the following:
 # - run tests
 # - build the app
 # - login to Azure with AZURE_CREDENTIALS github secret
@@ -952,11 +952,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Use Node.js 18
-        uses: actions/setup-node@v2
+      - uses: actions/checkout@v4
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
       - name: Install dependencies
         run: npm ci
       - name: Run tests
@@ -964,7 +964,7 @@ jobs:
       - name: Build
         run: npm run build
       - name: Login to Azure
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: Deploy to Azure
@@ -1027,13 +1027,13 @@ Como você pode ver, é muito sutil e a opção `--name` tem significados difere
 Vamos continuar adicionando este comentário:
 
 ```bash
-# Implante a aplicação com webapp usando node 18
+# Implante a aplicação com webapp usando node 20
 ```
 
 Agora, se você sugerir um comando semelhante ao que fez na primeira vez:
 
 ```bash
-az webapp up --sku F1 --name copilot-nodejs-todo --resource-group rg-copilot-nodejs-todo --runtime "node|18-lts"
+az webapp up --sku F1 --name copilot-nodejs-todo --resource-group rg-copilot-nodejs-todo --runtime "node|20-lts"
 ```
 
 Novamente, aceite a sugestão, mas precisaremos ajustar um pouco a opção `--name` para torná-la única. Pois ela também servirá como URL para o seu aplicativo da web. Altere para algo como: `--name nodejs-todo-YOUR_GITHUB_USERNAME`.

@@ -117,7 +117,7 @@ If you want to work locally without using a dev container, you need to clone the
 | | |
 |---------------|--------------------------------|
 | Git           | [Get Git](https://git-scm.com) |
-| Node.js v18+  | [Get Node.js](https://nodejs.org) |
+| Node.js v20+  | [Get Node.js](https://nodejs.org) |
 | Azure CLI     | [Get Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli#install) |
 | GitHub CLI    | [Get GitHub CLI](https://cli.github.com/manual/installation) |
 | Bash v3+      | [Get bash](https://www.gnu.org/software/bash/) (Windows users can use **Git bash** that comes with Git) |
@@ -886,7 +886,7 @@ This file will contain the instructions for our CI/CD pipeline.
 Create a new file in your repository with the path `.github/workflows/deploy.yml` and add the following content:
 
 ```yml
-# This workflow for our node.js 18 app does the following:
+# This workflow for our node.js 20 app does the following:
 # - run tests
 # - build the app
 # - login to Azure with AZURE_CREDENTIALS github secret
@@ -896,7 +896,7 @@ Create a new file in your repository with the path `.github/workflows/deploy.yml
 After you hit `enter`, Copilot might be tempted to complete the comments, but that's not what we want to ignore it if that's the case by hitting `enter` again. It should not starts to complete the workflow, continue accepting suggestion until you end up with something like this:
 
 ```yaml
-# This workflow for our node.js 18 app does the following:
+# This workflow for our node.js 20 app does the following:
 # - run tests
 # - build the app
 # - login to Azure with AZURE_CREDENTIALS github secret
@@ -913,11 +913,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Use Node.js 18
-        uses: actions/setup-node@v2
+      - uses: actions/checkout@v4
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
       - name: Install dependencies
         run: npm ci
       - name: Run tests
@@ -925,7 +925,7 @@ jobs:
       - name: Build
         run: npm run build
       - name: Login to Azure
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: Deploy to Azure
@@ -988,13 +988,13 @@ As you can see, it's very subtle and the `--name` option have different meanings
 Let's continue by adding this comment:
 
 ```bash
-# Deploy webapp using node 18
+# Deploy webapp using node 20
 ```
 
 Now it you suggest a command similar than what it did in the first place:
 
 ```bash
-az webapp up --sku F1 --name copilot-nodejs-todo --resource-group rg-copilot-nodejs-todo --runtime "node|18-lts"
+az webapp up --sku F1 --name copilot-nodejs-todo --resource-group rg-copilot-nodejs-todo --runtime "node|20-lts"
 ```
 
 Again, accept it, but we'll need to tweak the `--name` option a bit to make it unique, as it will also serve as the URL for your web app. Change it to something like `--name nodejs-todo-YOUR_GITHUB_USERNAME`.

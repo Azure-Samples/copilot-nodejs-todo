@@ -5,7 +5,7 @@ Discover how to use GitHub Copilot to quickly build a Node.js application with A
 👉 [See the workshop](https://aka.ms/ws/copilot-todo)
 
 ## Prerequisites
-- Node.js v18+
+- Node.js v20+
 - An Azure account ([sign up for free here](https://azure.microsoft.com/free/?WT.mc_id=javascript-0000-yolasors))
 
 You can use [GitHub Codespaces](https://github.com/features/codespaces) to work on this project directly from your browser: select the **Code** button, then the **Codespaces** tab and click on **Create Codespaces on main**.
