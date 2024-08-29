@@ -3,7 +3,7 @@
 # Usage: ./setup.sh <project_name>
 # Setup the current GitHub repo for deploying on Azure.
 ##############################################################################
-# v1.1.3 | dependencies: Azure CLI, GitHub CLI, jq
+# v1.1.4 | dependencies: Azure CLI, GitHub CLI, jq
 ##############################################################################
 
 set -euo pipefail
@@ -110,7 +110,10 @@ fi
 if [[ "$skip_login" == false ]]; then
   az_login_options=""
   if [[ "$use_code" == true || "${CODESPACES:-}" == true ]]; then
-    az_login_options="--use-device-code"
+    az_login_options="--use-device-code "
+  fi
+  if [[ -n "${TENANT_ID:-}" ]]; then
+    az_login_options+="--tenant ${TENANT_ID}"
   fi
 
   echo "Logging in to Azure..."
